@@ -7,19 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9521DA282BC151DE00D2494E /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA272BC151DE00D2494E /* TabBarController.swift */; };
+		9521DA2A2BC152A900D2494E /* StatisticViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA292BC152A900D2494E /* StatisticViewController.swift */; };
 		953D87A72BC0275D00CACBBC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D87A62BC0275D00CACBBC /* AppDelegate.swift */; };
 		953D87A92BC0275D00CACBBC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D87A82BC0275D00CACBBC /* SceneDelegate.swift */; };
-		953D87AB2BC0275D00CACBBC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D87AA2BC0275D00CACBBC /* ViewController.swift */; };
+		953D87AB2BC0275D00CACBBC /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D87AA2BC0275D00CACBBC /* TrackersViewController.swift */; };
 		953D87AE2BC0275D00CACBBC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 953D87AC2BC0275D00CACBBC /* Main.storyboard */; };
 		953D87B02BC0275F00CACBBC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 953D87AF2BC0275F00CACBBC /* Assets.xcassets */; };
 		953D87B32BC0275F00CACBBC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 953D87B12BC0275F00CACBBC /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9521DA272BC151DE00D2494E /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
+		9521DA292BC152A900D2494E /* StatisticViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticViewController.swift; sourceTree = "<group>"; };
 		953D87A32BC0275D00CACBBC /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		953D87A62BC0275D00CACBBC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		953D87A82BC0275D00CACBBC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		953D87AA2BC0275D00CACBBC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		953D87AA2BC0275D00CACBBC /* TrackersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersViewController.swift; sourceTree = "<group>"; };
 		953D87AD2BC0275D00CACBBC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		953D87AF2BC0275F00CACBBC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		953D87B22BC0275F00CACBBC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -58,7 +62,9 @@
 			children = (
 				953D87A62BC0275D00CACBBC /* AppDelegate.swift */,
 				953D87A82BC0275D00CACBBC /* SceneDelegate.swift */,
-				953D87AA2BC0275D00CACBBC /* ViewController.swift */,
+				953D87AA2BC0275D00CACBBC /* TrackersViewController.swift */,
+				9521DA272BC151DE00D2494E /* TabBarController.swift */,
+				9521DA292BC152A900D2494E /* StatisticViewController.swift */,
 				953D87AC2BC0275D00CACBBC /* Main.storyboard */,
 				953D87AF2BC0275F00CACBBC /* Assets.xcassets */,
 				953D87B12BC0275F00CACBBC /* LaunchScreen.storyboard */,
@@ -138,8 +144,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				953D87AB2BC0275D00CACBBC /* ViewController.swift in Sources */,
+				953D87AB2BC0275D00CACBBC /* TrackersViewController.swift in Sources */,
+				9521DA282BC151DE00D2494E /* TabBarController.swift in Sources */,
 				953D87A72BC0275D00CACBBC /* AppDelegate.swift in Sources */,
+				9521DA2A2BC152A900D2494E /* StatisticViewController.swift in Sources */,
 				953D87A92BC0275D00CACBBC /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

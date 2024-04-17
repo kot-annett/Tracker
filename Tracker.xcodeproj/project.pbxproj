@@ -15,6 +15,10 @@
 		9521DA342BC7095A00D2494E /* NewHabitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA332BC7095A00D2494E /* NewHabitViewController.swift */; };
 		9521DA362BC70A1F00D2494E /* NewEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA352BC70A1F00D2494E /* NewEventViewController.swift */; };
 		9521DA392BC7F43000D2494E /* NewHabitTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA382BC7F43000D2494E /* NewHabitTableViewCell.swift */; };
+		9521DA3C2BC861E400D2494E /* NewEventTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA3B2BC861E400D2494E /* NewEventTableViewCell.swift */; };
+		9521DA402BCBF7C700D2494E /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA3F2BCBF7C700D2494E /* Constant.swift */; };
+		9521DA422BCD267900D2494E /* UITextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA412BCD267900D2494E /* UITextField.swift */; };
+		9521DA442BCFB6AD00D2494E /* SupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9521DA432BCFB6AD00D2494E /* SupplementaryView.swift */; };
 		953D87A72BC0275D00CACBBC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D87A62BC0275D00CACBBC /* AppDelegate.swift */; };
 		953D87A92BC0275D00CACBBC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D87A82BC0275D00CACBBC /* SceneDelegate.swift */; };
 		953D87AB2BC0275D00CACBBC /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D87AA2BC0275D00CACBBC /* TrackersViewController.swift */; };
@@ -32,6 +36,10 @@
 		9521DA332BC7095A00D2494E /* NewHabitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewHabitViewController.swift; sourceTree = "<group>"; };
 		9521DA352BC70A1F00D2494E /* NewEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEventViewController.swift; sourceTree = "<group>"; };
 		9521DA382BC7F43000D2494E /* NewHabitTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewHabitTableViewCell.swift; sourceTree = "<group>"; };
+		9521DA3B2BC861E400D2494E /* NewEventTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEventTableViewCell.swift; sourceTree = "<group>"; };
+		9521DA3F2BCBF7C700D2494E /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
+		9521DA412BCD267900D2494E /* UITextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITextField.swift; sourceTree = "<group>"; };
+		9521DA432BCFB6AD00D2494E /* SupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementaryView.swift; sourceTree = "<group>"; };
 		953D87A32BC0275D00CACBBC /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		953D87A62BC0275D00CACBBC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		953D87A82BC0275D00CACBBC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -69,15 +77,41 @@
 			path = TabBar;
 			sourceTree = "<group>";
 		};
-		9521DA372BC70DE500D2494E /* NewHabit */ = {
+		9521DA372BC70DE500D2494E /* NewTracker */ = {
 			isa = PBXGroup;
 			children = (
 				9521DA312BC7052F00D2494E /* NewTrackerViewController.swift */,
-				9521DA352BC70A1F00D2494E /* NewEventViewController.swift */,
+				9521DA3D2BC861EB00D2494E /* NewEvent */,
+				9521DA3A2BC8618200D2494E /* NewHabit */,
+			);
+			path = NewTracker;
+			sourceTree = "<group>";
+		};
+		9521DA3A2BC8618200D2494E /* NewHabit */ = {
+			isa = PBXGroup;
+			children = (
 				9521DA332BC7095A00D2494E /* NewHabitViewController.swift */,
 				9521DA382BC7F43000D2494E /* NewHabitTableViewCell.swift */,
 			);
 			path = NewHabit;
+			sourceTree = "<group>";
+		};
+		9521DA3D2BC861EB00D2494E /* NewEvent */ = {
+			isa = PBXGroup;
+			children = (
+				9521DA352BC70A1F00D2494E /* NewEventViewController.swift */,
+				9521DA3B2BC861E400D2494E /* NewEventTableViewCell.swift */,
+			);
+			path = NewEvent;
+			sourceTree = "<group>";
+		};
+		9521DA3E2BCBF7AD00D2494E /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				9521DA3F2BCBF7C700D2494E /* Constant.swift */,
+				9521DA412BCD267900D2494E /* UITextField.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 		953D879A2BC0275D00CACBBC = {
@@ -103,9 +137,11 @@
 				953D87A82BC0275D00CACBBC /* SceneDelegate.swift */,
 				953D87AA2BC0275D00CACBBC /* TrackersViewController.swift */,
 				9521DA2F2BC5630400D2494E /* TrackerCollectionViewCell.swift */,
+				9521DA432BCFB6AD00D2494E /* SupplementaryView.swift */,
 				9521DA292BC152A900D2494E /* StatisticViewController.swift */,
-				9521DA372BC70DE500D2494E /* NewHabit */,
+				9521DA372BC70DE500D2494E /* NewTracker */,
 				9521DA2E2BC2CD6A00D2494E /* TabBar */,
+				9521DA3E2BCBF7AD00D2494E /* Helpers */,
 				9521DA2D2BC2CD5900D2494E /* Models */,
 				953D87AC2BC0275D00CACBBC /* Main.storyboard */,
 				953D87AF2BC0275F00CACBBC /* Assets.xcassets */,
@@ -191,9 +227,13 @@
 				9521DA362BC70A1F00D2494E /* NewEventViewController.swift in Sources */,
 				9521DA342BC7095A00D2494E /* NewHabitViewController.swift in Sources */,
 				9521DA392BC7F43000D2494E /* NewHabitTableViewCell.swift in Sources */,
+				9521DA3C2BC861E400D2494E /* NewEventTableViewCell.swift in Sources */,
 				9521DA282BC151DE00D2494E /* TabBarController.swift in Sources */,
 				953D87A72BC0275D00CACBBC /* AppDelegate.swift in Sources */,
 				9521DA2A2BC152A900D2494E /* StatisticViewController.swift in Sources */,
+				9521DA422BCD267900D2494E /* UITextField.swift in Sources */,
+				9521DA442BCFB6AD00D2494E /* SupplementaryView.swift in Sources */,
+				9521DA402BCBF7C700D2494E /* Constant.swift in Sources */,
 				9521DA302BC5630400D2494E /* TrackerCollectionViewCell.swift in Sources */,
 				9521DA322BC7052F00D2494E /* NewTrackerViewController.swift in Sources */,
 				953D87A92BC0275D00CACBBC /* SceneDelegate.swift in Sources */,

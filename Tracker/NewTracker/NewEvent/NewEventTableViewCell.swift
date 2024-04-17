@@ -1,5 +1,5 @@
 //
-//  NewHabitTableViewCell.swift
+//  NewEventTableViewCell.swift
 //  Tracker
 //
 //  Created by Anna on 11.04.2024.
@@ -8,8 +8,8 @@
 import Foundation
 import UIKit
 
-final class NewHabitTableViewCell: UITableViewCell {
-    static let reuseIdentifier = "NewHabitTableViewCell"
+final class NewEventTableViewCell: UITableViewCell {
+    static let reuseIdentifier = "NewEventTableViewCell"
     
     private let descriptionLabel: UILabel = {
         let label = UILabel()

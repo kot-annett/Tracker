@@ -1,5 +1,5 @@
 //
-//  NewHabitViewController.swift
+//  NewEventViewController.swift
 //  Tracker
 //
 //  Created by Anna on 10.04.2024.
@@ -8,10 +8,10 @@
 import Foundation
 import UIKit
 
-final class NewHabitViewController: UIViewController {
+final class NewEventViewController: UIViewController {
     
-    private let titles = ["Категория", "Расписание"]
-    
+    private let titles = ["Категория"]
+                          
     private let nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
@@ -25,7 +25,7 @@ final class NewHabitViewController: UIViewController {
         let tableView = UITableView()
         tableView.layer.cornerRadius = 16
         tableView.isScrollEnabled = false
-        tableView.register(NewHabitTableViewCell.self, forCellReuseIdentifier: NewHabitTableViewCell.reuseIdentifier)
+        tableView.register(NewEventTableViewCell.self, forCellReuseIdentifier: NewEventTableViewCell.reuseIdentifier)
         return tableView
     }()
     
@@ -117,23 +117,23 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "Новая привычка"
+        navigationItem.title = "Новое нерегулярное событие"
         navigationController?.isNavigationBarHidden = false
         navigationItem.hidesBackButton = true
         view.backgroundColor = .white
     }
 }
 
-extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
+extension NewEventViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return titles.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: NewHabitTableViewCell.reuseIdentifier,
+            withIdentifier: NewEventTableViewCell.reuseIdentifier,
             for: indexPath
-        ) as? NewHabitTableViewCell else { return UITableViewCell() }
+        ) as? NewEventTableViewCell else { return UITableViewCell() }
         
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         cell.setTitle(titles[indexPath.row])
@@ -145,9 +145,10 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         return 75
     }
     
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        <#code#>
-//    }
+    //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    //        <#code#>
+    //    }
     
     
 }
+

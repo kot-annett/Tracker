@@ -10,6 +10,8 @@ import UIKit
 
 protocol TrackerCollectionViewCellDelegate: AnyObject {
     func record(_ sender: Bool, _ cell: TrackerCollectionViewCell)
+    func completeTracker(id: UUID, at indexPath: IndexPath)
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -18,8 +20,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     weak var delegate: TrackerCollectionViewCellDelegate?
     
-    private var days: [String] = ["дней", "день", "дня"]
     private var quantity: Int = 0
+    private var trackerIsCompleted: Bool = false
+    private var trackerId: UUID?
+    private var indexPath: IndexPath?
     
     private let colorView: UIView = {
         let view = UIView()
@@ -49,8 +53,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let quantityButton: UIButton = {
         let button = UIButton()
         button.layer.cornerRadius = 17
-//        button.setPreferredSymbolConfiguration((.init(pointSize: 12)), forImageIn: .normal)
-        button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.tintColor = .white
         button.addTarget(
             self,
@@ -62,6 +64,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private let quantityLabel: UILabel = {
         let label = UILabel()
+        label.text = "1 день"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .black
         return label
@@ -76,77 +79,80 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with tracker: Tracker) {
+    func configure(
+        with tracker: Tracker,
+        trackerIsCompleted: Bool,
+        completedDays: Int,
+        indexPath: IndexPath
+    ) {
+        self.trackerIsCompleted = trackerIsCompleted
+        self.trackerId = tracker.id
+        self.indexPath = indexPath
+        
         nameLabel.text = tracker.name
         colorView.backgroundColor = tracker.color
         quantityButton.backgroundColor = tracker.color
         emojiImageView.text = tracker.emoji
-    }
-    
-    func trackerIsCompleted(_ sender: Bool) {
-        switch sender {
-        case true:
-            quantityButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-            quantityButton.alpha = 0.3
-        case false:
-            quantityButton.setImage(UIImage(systemName: "plus"), for: .normal)
-            quantityButton.alpha = 1
+        
+        let imageName = trackerIsCompleted ? "checkmark" : "plus"
+        if let image = UIImage(systemName: imageName) {
+            quantityButton.setImage(image, for: .normal)
         }
+        
+        quantityLabel.text = setQuantityLabelText(completedDays)
+        setupQuantityButton(with: tracker)
     }
-    
-    func buttonIsEnabled(_ sender: Bool) {
-        switch sender {
-        case true:
-            quantityButton.isEnabled = true
-        case false:
-            quantityButton.isEnabled = false
-            quantityButton.alpha = 0
-        }
-    }
-    
-    func setQuantity(_ sender: Int) {
-        quantity = sender
-        setQuantityLabelText()
-    }
-    
+   
     @objc private func quantityButtonTapped() {
+        guard let trackerId = trackerId, let indexPath = indexPath else {
+            assertionFailure("no trackerId and indexPath")
+            return
+        }
+        
+        if trackerIsCompleted {
+            delegate?.uncompleteTracker(id: trackerId, at: indexPath)
+        } else {
+            delegate?.completeTracker(id: trackerId, at: indexPath)
+        }
+    }
+    
+    private func setupQuantityButton(with tracker: Tracker) {
         switch quantityButton.currentImage {
-        case UIImage(systemName: "plus")?.withRenderingMode(.alwaysTemplate):
-            trackerIsCompleted(true)
-            quantity += 1
-            setQuantityLabelText()
-            delegate?.record(true, self)
-        case UIImage(systemName: "checkmark")?.withRenderingMode(.alwaysTemplate):
-            trackerIsCompleted(false)
-            quantity -= 1
-            setQuantityLabelText()
-            delegate?.record(false, self)
+        case UIImage(systemName: "plus"):
+            colorView.backgroundColor = tracker.color
+        case UIImage(systemName: "checkmark"):
+            quantityButton.backgroundColor = tracker.color.withAlphaComponent(0.3)
         case .none:
             break
         case .some(_):
             break
         }
+        let plusImage = UIImage(systemName: "checkmark")
+        let checkImage = UIImage(systemName: "plus")
     }
    
-    private func setQuantityLabelText() {
-        switch quantity {
-        case 1:
-            quantityLabel.text = "\(quantity) \(days[1])"
-        case 2...4:
-            quantityLabel.text = "\(quantity) \(days[2])"
+    private func setQuantityLabelText(_ count: Int) -> String {
+        let daysForms = ["дней", "день", "дня"]
+        let remainder100 = count % 100
+        let remainder10 = count % 10
+        // Индекс формы слова "день" в массиве, который будем использовать
+        var formIndex: Int
+        
+        switch remainder100 {
+        case 11...14: // Если остаток от 11 до 14, используем форму "дней"
+            formIndex = 0
         default:
-            quantityLabel.text = "\(quantity) \(days[0])"
-        }
-        
-        if quantity % 10 == 1 && !(quantity % 100 == 11) {
-            quantityLabel.text = "\(quantity) \(days[1])"
-        }
-        
-        for i in 2...4 {
-            if quantity % 10 == i && !(quantity % 100 == i + 10) {
-                quantityLabel.text = "\(quantity) \(days[2])"
+            switch remainder10 {
+            case 1: // Если остаток равен 1 и число не оканчивается на 11, используем форму "день"
+                formIndex = 1
+            case 2...4: // Если остаток от 2 до 4 и число не оканчивается на 12, 13, 14, используем форму "дня"
+                formIndex = 2
+            default: // Во всех остальных случаях, используем форму "дней"
+                formIndex = 0
             }
         }
+        
+        return "\(count) \(daysForms[formIndex])"
     }
     
     private func setupUI() {

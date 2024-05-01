@@ -146,23 +146,6 @@ final class TrackersViewController: UIViewController {
     }
 }
 
-extension TrackersViewController: TrackerCollectionViewCellDelegate {
-    func record(_ sender: Bool, _ cell: TrackerCollectionViewCell) {
-        guard let indexPath = collectionView.indexPath(for: cell) else { return }
-        let id = createdCategories[indexPath.section].trackers[indexPath.row].id
-        let newRecord = TrackerRecord(trackerID: id, date: currentDate)
-        
-        switch sender {
-        case true:
-            completedTrackers.insert(newRecord)
-        case false:
-            completedTrackers.remove(newRecord)
-        }
-        
-        collectionView.reloadItems(at: [indexPath])
-    }
-}
-
 extension TrackersViewController: UICollectionViewDataSource {
     func collectionView(
         _ collectionView: UICollectionView,
@@ -181,28 +164,34 @@ extension TrackersViewController: UICollectionViewDataSource {
     ) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier, for: indexPath) as! TrackerCollectionViewCell
 
+        let tracker = createdCategories[indexPath.section].trackers[indexPath.row]
         let id = createdCategories[indexPath.section].trackers[indexPath.row].id
         
-        if completedTrackers.contains(where: {
-            $0.trackerID == id && $0.date == currentDate
-        }) {
-            cell.trackerIsCompleted(true)
-        } else {
-            cell.trackerIsCompleted(false)
-        }
-        
-        var quantity = 0
-        completedTrackers.forEach({
-            if $0.trackerID == id {
-                quantity += 1
-            }
-        })
-        cell.setQuantity(quantity)
-
         cell.delegate = self
-        cell.configure(with: createdCategories[indexPath.section].trackers[indexPath.row])
+        let isCompletedToday = isTrackerCompletedToday(id: tracker.id)
+        let completedDays = completedTrackers.filter {
+            $0.trackerID == tracker.id
+        }.count
+        
+        cell.configure(
+            with: tracker,
+            trackerIsCompleted: isCompletedToday, 
+            completedDays: completedDays,
+            indexPath: indexPath
+        )
         
         return cell
+    }
+    
+    private func isTrackerCompletedToday(id: UUID) -> Bool {
+        completedTrackers.contains { trackerRecord in
+            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        }
+    }
+    
+    private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
+        let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
+        return trackerRecord.trackerID == id && isSameDay
     }
     
     func collectionView(
@@ -315,6 +304,40 @@ extension TrackersViewController {
         createdCategories = filteredCategories
         collectionView.reloadData()
         }
+}
+
+extension TrackersViewController: TrackerCollectionViewCellDelegate {
+    func completeTracker(id: UUID, at indexPath: IndexPath) {
+        if currentDate <= Date() {
+            let trackerRecord = TrackerRecord(trackerID: id, date: datePicker.date)
+            completedTrackers.insert(trackerRecord)
+            
+            collectionView.reloadItems(at: [indexPath])
+        }
+    }
+    
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+        completedTrackers = completedTrackers.filter { trackerRecord in
+            !isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        }
+        
+        collectionView.reloadItems(at: [indexPath])
+    }
+   
+    func record(_ sender: Bool, _ cell: TrackerCollectionViewCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        let id = createdCategories[indexPath.section].trackers[indexPath.row].id
+        let newRecord = TrackerRecord(trackerID: id, date: currentDate)
+        
+        switch sender {
+        case true:
+            completedTrackers.insert(newRecord)
+        case false:
+            completedTrackers.remove(newRecord)
+        }
+        
+        collectionView.reloadItems(at: [indexPath])
+    }
 }
 
 extension TrackersViewController: NewTrackerViewControllerDelegate {

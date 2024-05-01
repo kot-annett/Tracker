@@ -8,8 +8,14 @@
 import Foundation
 import UIKit
 
+protocol NewTrackerViewControllerDelegate: AnyObject {
+    func setDateForNewTracker() -> String
+    func didCreateNewTracker(_ tracker: Tracker)
+}
 
 final class NewTrackerViewController: UIViewController {
+    
+    weak var delegate: NewTrackerViewControllerDelegate?
     
     private let habitButton: UIButton = {
         let button = UIButton()
@@ -74,7 +80,9 @@ final class NewTrackerViewController: UIViewController {
     }
     
     @objc private func habitButtonTapped() {
-        navigationController?.pushViewController(NewHabitViewController(), animated: true)
+        let newHabitViewController = NewHabitViewController()
+        newHabitViewController.delegate = delegate
+        navigationController?.pushViewController(newHabitViewController, animated: true)
         print("Привычка button tapped")
     }
     

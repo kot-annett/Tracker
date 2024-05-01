@@ -10,10 +10,10 @@ import UIKit
 final class TrackersViewController: UIViewController {
     
     private var categories: [TrackerCategory] = []
+    private var createdCategories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
-    
-    private var datePickerString: String = ""
-    private var currentDateString: String = ""
+    private var currentDate: Date = Date()
+    private var selectedWeekDay: WeekDay = .Monday
     
     private let collectionView: UICollectionView = {
         let collectionView = UICollectionView(
@@ -58,27 +58,24 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         setupNavigationBar()
         setupUI()
-
-        let newHabitViewController = NewHabitViewController()
-        newHabitViewController.delegate = self
-        
         updateUI()
     }
     
     @objc private func addTrackerButtonTapped() {
-        let newHabitViewController = NewHabitViewController()
-        newHabitViewController.delegate = self
-//        let navigationController = UINavigationController(rootViewController: NewTrackerViewController())
-        let navigationController = UINavigationController(rootViewController: newHabitViewController)
+        let newTrackerViewController = NewTrackerViewController()
+        newTrackerViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: newTrackerViewController)
         present(navigationController, animated: true)
     }
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy"
-        let formattedDate = dateFormatter.string(from: selectedDate)
-        print("Выбранная дата: \(formattedDate)")
+        currentDate = sender.date
+        print("Selected date: \(currentDate)")
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: currentDate) - 1
+        selectedWeekDay = WeekDay(rawValue: weekday) ?? .Monday
+        filteredTrackers()
+        updateUI()
     }
     
     private func setupUI() {
@@ -135,7 +132,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func updateUI() {
-        if categories.isEmpty {
+        if createdCategories.isEmpty {
             placeholderImageView.isHidden = false
             placeholderLabel.isHidden = false
             collectionView.isHidden = true
@@ -152,8 +149,8 @@ final class TrackersViewController: UIViewController {
 extension TrackersViewController: TrackerCollectionViewCellDelegate {
     func record(_ sender: Bool, _ cell: TrackerCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
-        let id = categories[indexPath.section].trackers[indexPath.row].id
-        let newRecord = TrackerRecord(trackerID: id, date: datePickerString)
+        let id = createdCategories[indexPath.section].trackers[indexPath.row].id
+        let newRecord = TrackerRecord(trackerID: id, date: currentDate)
         
         switch sender {
         case true:
@@ -161,6 +158,8 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         case false:
             completedTrackers.remove(newRecord)
         }
+        
+        collectionView.reloadItems(at: [indexPath])
     }
 }
 
@@ -169,11 +168,11 @@ extension TrackersViewController: UICollectionViewDataSource {
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        return categories[section].trackers.count
+        return createdCategories[section].trackers.count
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categories.count
+        return createdCategories.count
     }
     
     func collectionView(
@@ -181,14 +180,11 @@ extension TrackersViewController: UICollectionViewDataSource {
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier, for: indexPath) as! TrackerCollectionViewCell
-        
-        cell.delegate = self
-        cell.configure(with: categories[indexPath.section].trackers[indexPath.row])
-        
-        let id = categories[indexPath.section].trackers[indexPath.row].id
+
+        let id = createdCategories[indexPath.section].trackers[indexPath.row].id
         
         if completedTrackers.contains(where: {
-            $0.trackerID == id && $0.date == datePickerString
+            $0.trackerID == id && $0.date == currentDate
         }) {
             cell.trackerIsCompleted(true)
         } else {
@@ -202,13 +198,10 @@ extension TrackersViewController: UICollectionViewDataSource {
             }
         })
         cell.setQuantity(quantity)
-        
-        if datePickerString > currentDateString {
-            cell.buttonIsEnabled(false)
-        } else {
-            cell.buttonIsEnabled(true)
-        }
 
+        cell.delegate = self
+        cell.configure(with: createdCategories[indexPath.section].trackers[indexPath.row])
+        
         return cell
     }
     
@@ -231,7 +224,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             for: indexPath
         ) as! SupplementaryView
         
-        let title = categories[indexPath.section].title
+        let title = createdCategories[indexPath.section].title
         view.setTitle(title)
         return view
     }
@@ -284,12 +277,11 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     ) -> CGFloat {
         return 9
     }
-    
 }
 
 extension TrackersViewController {
     func addTracker(_ tracker: Tracker, to categoryIndex: Int) {
-        var updatedCategories = categories
+        var updatedCategories = createdCategories
         
         if categoryIndex < updatedCategories.count {
             updatedCategories[categoryIndex].trackers.append(tracker)
@@ -298,16 +290,38 @@ extension TrackersViewController {
             updatedCategories.append(newCategory)
         }
         
-        categories = updatedCategories
-        
+        createdCategories = updatedCategories
         updateUI()
     }
- 
+    
+    private func filteredTrackers() {
+        // Фильтрация трекеров по текущей дате
+        var filteredCategories = [TrackerCategory]()
+        let calendar = Calendar.current
+        let filteredWeekDay = calendar.component(.weekday, from: currentDate) - 1
+        
+        print("Filtered Weekday: \(filteredWeekDay)")
+        
+        for category in createdCategories {
+            let filteredTrackers = category.trackers.filter { tracker in
+                return tracker.schedule.contains(selectedWeekDay.stringValue)
+            }
+            if !filteredTrackers.isEmpty {
+                let filteredCategory = TrackerCategory(title: category.title, trackers: filteredTrackers)
+                filteredCategories.append(filteredCategory)
+            }
+        }
+        
+        createdCategories = filteredCategories
+        collectionView.reloadData()
+        }
 }
 
-extension TrackersViewController: NewHabitViewControllerDelegate {
+extension TrackersViewController: NewTrackerViewControllerDelegate {
     func setDateForNewTracker() -> String {
-        return datePickerString
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        return dateFormatter.string(from: currentDate)
     }
     
     func didCreateNewTracker(_ tracker: Tracker) {

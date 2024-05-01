@@ -31,17 +31,39 @@ struct TrackerCategory {
 
 struct TrackerRecord: Hashable {
     let trackerID: UUID
-    let date: String
+    let date: Date
 }
 
-enum WeekDay: String, CaseIterable {
-    case Monday = "Пн"
-    case Tuesday = "Вт"
-    case Wednesday = "Ср"
-    case Thursday = "Чт"
-    case Friday = "Пт"
-    case Saturday = "Сб"
-    case Sunday = "Вс"
+//enum WeekDay: String, CaseIterable {
+//    case Monday = "Пн"
+//    case Tuesday = "Вт"
+//    case Wednesday = "Ср"
+//    case Thursday = "Чт"
+//    case Friday = "Пт"
+//    case Saturday = "Сб"
+//    case Sunday = "Вс"
+//}
+
+enum WeekDay: Int, CaseIterable {
+    case Monday = 1
+    case Tuesday = 2
+    case Wednesday = 3
+    case Thursday = 4
+    case Friday = 5
+    case Saturday = 6
+    case Sunday = 0
+    
+    var stringValue: String {
+        switch self {
+            case .Monday: return "Пн"
+            case .Tuesday: return "Вт"
+            case .Wednesday: return "Ср"
+            case .Thursday: return "Чт"
+            case .Friday: return "Пт"
+            case .Saturday: return "Сб"
+            case .Sunday: return "Вс"
+        }
+    }
 }
 
 enum TrackerType {

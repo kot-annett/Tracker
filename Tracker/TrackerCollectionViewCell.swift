@@ -36,14 +36,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-//    private let emojiImageView: UIImageView = {
-//        let imageView = UIImageView()
-//        imageView.backgroundColor = .white.withAlphaComponent(0.3)
-//        imageView.layer.cornerRadius = 12
-//        imageView.layer.masksToBounds = true
-//        return imageView
-//    }()
-    
     private let emojiImageView: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -57,7 +49,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let quantityButton: UIButton = {
         let button = UIButton()
         button.layer.cornerRadius = 17
-        button.setPreferredSymbolConfiguration((.init(pointSize: 12)), forImageIn: .normal)
+//        button.setPreferredSymbolConfiguration((.init(pointSize: 12)), forImageIn: .normal)
         button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.tintColor = .white
         button.addTarget(
@@ -134,9 +126,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         case .some(_):
             break
         }
-    
     }
-    
+   
     private func setQuantityLabelText() {
         switch quantity {
         case 1:
@@ -193,6 +184,5 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             quantityLabel.centerYAnchor.constraint(equalTo: quantityButton.centerYAnchor)
         ])
     }
-    
 }
 

@@ -8,20 +8,16 @@
 import Foundation
 import UIKit
 
-protocol NewHabitViewControllerDelegate: AnyObject {
-    func setDateForNewTracker() -> String
-    func didCreateNewTracker(_ tracker: Tracker)
-}
-
 final class NewHabitViewController: UIViewController {
     
-    weak var delegate: NewHabitViewControllerDelegate?
+    weak var delegate: NewTrackerViewControllerDelegate?
     
     private let titles = ["Категория", "Расписание"]
     private let trackerType: TrackerType = .habit
     private let newTrackername: String = ""
     private var categoryName: String = ""
     private var schedule: [String] = []
+    var selectedDays: [WeekDay: Bool] = [:]
     
     private let nameTextField: UITextField = {
         let textField = UITextField()
@@ -89,6 +85,7 @@ final class NewHabitViewController: UIViewController {
         tableView.delegate = self
         nameTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
     }
+    
     @objc private func textFieldDidChange(_ textField: UITextField) {
         checkCreateButtonAvailability()
     }
@@ -105,7 +102,9 @@ final class NewHabitViewController: UIViewController {
         
         switch trackerType {
         case .habit:
-            newTrackerSchedule = self.schedule
+            if selectedDays.values.contains(true) {
+                newTrackerSchedule = selectedDays.filter { $0.value }.map { $0.key.stringValue }
+            }
         case .event:
             newTrackerSchedule = [date]
         }
@@ -185,6 +184,20 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         cell.setTitle(titles[indexPath.row])
         
+        if indexPath.row == 1 {
+            let selectedDaysArray = selectedDays.filter { $0.value }.map { $0.key }
+            if selectedDaysArray.isEmpty {
+                cell.setDescription("") 
+            } else if selectedDaysArray.count == WeekDay.allCases.count {
+                cell.setDescription("Каждый день") // Отображаем "Каждый день", если выбраны все дни
+            } else {
+                let selectedDaysString = selectedDaysArray.map { $0.stringValue }.joined(separator: ", ")
+                cell.setDescription(selectedDaysString) // Отображаем выбранные дни
+            }
+        } else {
+            cell.setDescription("") // Очищаем описание для других ячеек
+        }
+        
         return cell
     }
     
@@ -192,9 +205,26 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         return 75
     }
     
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        <#code#>
-//    }
-    
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        switch indexPath.row {
+        case 0:
+            let categoryVC = CategoryViewController()
+            navigationController?.pushViewController(categoryVC, animated: true)
+        case 1:
+            let scheduleVC = ScheduleViewController()
+            scheduleVC.selectedDays = selectedDays
+            scheduleVC.delegate = self
+            navigationController?.pushViewController(scheduleVC, animated: true)
+        default:
+            break
+        }
+        
+    }
+}
+
+extension NewHabitViewController: ScheduleViewControllerDelegate {
+    func didSelectDays(_ days: [WeekDay: Bool]) {
+            selectedDays = days
+            tableView.reloadData()
+        }
 }

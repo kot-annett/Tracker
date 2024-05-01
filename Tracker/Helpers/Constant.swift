@@ -14,6 +14,11 @@ enum Constant {
     "🐶", "🪴", "🍎", "🥑", "🍷", "🛼",
     "🧘‍♀️", "🎹", "✈️", "🏝️", "⏰", "❤️"
     ]
+    
+    //ScheduleViewController
+    static let scheduleTableViewTitles = [
+        "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"
+    ]
 }
 
 extension Constant {
@@ -21,4 +26,8 @@ extension Constant {
         return emojies.randomElement() ?? "❤️"
     }
 }
+
+
+
+
 

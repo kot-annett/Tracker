@@ -102,18 +102,25 @@ extension ScheduleViewController: UITableViewDataSource {
             for: indexPath
         ) as? ScheduleTableViewCell else { return UITableViewCell() }
         
-        cell.switchView.addTarget(self, action: #selector(switchViewChanged), for: .valueChanged)
+        cell.switchView.addTarget(
+            self,
+            action: #selector(switchViewChanged),
+            for: .valueChanged
+        )
         
-        cell.textLabel?.text = titles[indexPath.row]
+        cell.configure(
+            title: titles[indexPath.row],
+            isSwithcOn: selectedDays[WeekDay.allCases[indexPath.row]] ?? false
+        )
+        
+//        cell.textLabel?.text = titles[indexPath.row]
         
         print("Cell for row \(indexPath.row) configured")
         cell.selectionStyle = .none
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         return cell
-    }
-    
-    
+    } 
 }
 
 extension ScheduleViewController: UITableViewDelegate {

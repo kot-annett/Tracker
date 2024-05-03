@@ -128,7 +128,7 @@ final class NewHabitViewController: UIViewController {
         }
         
         createButton.isEnabled = true
-        createButton.backgroundColor = .systemBlue
+        createButton.backgroundColor = UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
     }
     
     private func setupUI() {

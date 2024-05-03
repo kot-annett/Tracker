@@ -10,6 +10,8 @@ import UIKit
 
 final class NewEventViewController: UIViewController {
     
+    weak var delegate: NewTrackerViewControllerDelegate?
+    
     private let titles = ["Категория"]
                           
     private let nameTextField: UITextField = {
@@ -75,6 +77,11 @@ final class NewEventViewController: UIViewController {
         setupNavigationBar()
         tableView.dataSource = self
         tableView.delegate = self
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        checkCreateButtonAvailability()
     }
     
     @objc private func cancelButtonTapped() {
@@ -82,7 +89,27 @@ final class NewEventViewController: UIViewController {
     }
     
     @objc private func createButtonTapped() {
+        guard let newTrackerName = nameTextField.text else { return }
+        let newTracker = Tracker(
+            id: UUID(),
+            name: newTrackerName,
+            color: .systemPink,
+            emoji: Constant.randomEmoji(),
+            schedule: []
+        )
+        delegate?.didCreateNewTracker(newTracker)
         dismiss(animated: true)
+    }
+    
+    private func checkCreateButtonAvailability() {
+        guard let name = nameTextField.text, !name.isEmpty else {
+            createButton.isEnabled = false
+            createButton.backgroundColor = .gray
+            return
+        }
+        
+        createButton.isEnabled = true
+        createButton.backgroundColor = UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
     }
     
     private func setupUI() {
@@ -144,11 +171,5 @@ extension NewEventViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
-    
-    //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    //        <#code#>
-    //    }
-    
-    
 }
 

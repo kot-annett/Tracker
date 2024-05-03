@@ -87,7 +87,9 @@ final class NewTrackerViewController: UIViewController {
     }
     
     @objc private func eventButtonTapped() {
-        navigationController?.pushViewController(NewEventViewController(), animated: true)
+        let newEventViewController = NewEventViewController()
+        newEventViewController.delegate = delegate
+        navigationController?.pushViewController(newEventViewController, animated: true)
         print("Нерегулярное событие button tapped")
     }
 }

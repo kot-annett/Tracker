@@ -34,16 +34,6 @@ struct TrackerRecord: Hashable {
     let date: Date
 }
 
-//enum WeekDay: String, CaseIterable {
-//    case Monday = "Пн"
-//    case Tuesday = "Вт"
-//    case Wednesday = "Ср"
-//    case Thursday = "Чт"
-//    case Friday = "Пт"
-//    case Saturday = "Сб"
-//    case Sunday = "Вс"
-//}
-
 enum WeekDay: Int, CaseIterable {
     case Monday = 1
     case Tuesday = 2

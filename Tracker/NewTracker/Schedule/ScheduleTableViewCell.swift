@@ -43,6 +43,11 @@ final class ScheduleTableViewCell: UITableViewCell {
         
     }
     
+    func configure(title: String, isSwithcOn: Bool) {
+        titleLabel.text = title
+        switchView.isOn = isSwithcOn
+    }
+    
     private func setupUI() {
         selectionStyle = .none
         backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
@@ -54,6 +59,7 @@ final class ScheduleTableViewCell: UITableViewCell {
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             titleLabel.heightAnchor.constraint(equalToConstant: 22),
             
             switchView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -61,5 +67,4 @@ final class ScheduleTableViewCell: UITableViewCell {
             switchView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             ])
     }
-    
 }

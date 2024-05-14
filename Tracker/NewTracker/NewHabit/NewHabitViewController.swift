@@ -145,12 +145,14 @@ final class NewHabitViewController: UIViewController {
             newTrackerSchedule = [date]
         }
         
+        let formattedSchedule = newTrackerSchedule.joined(separator: ", ")
+        
         let newTracker = Tracker(
             id: UUID(),
             name: newTrackerName,
             color: selectedColor ?? .orange,
             emoji: selectedEmoji ?? Constant.randomEmoji(),
-            schedule: newTrackerSchedule
+            schedule: formattedSchedule
         )
         delegate?.didCreateNewTracker(newTracker)
         dismiss(animated: true)

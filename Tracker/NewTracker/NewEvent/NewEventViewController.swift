@@ -131,7 +131,7 @@ final class NewEventViewController: UIViewController {
             name: newTrackerName,
             color: selectedColor ?? .systemPink,
             emoji: selectedEmoji ?? Constant.randomEmoji(),
-            schedule: []
+            schedule: ""
         )
         delegate?.didCreateNewTracker(newTracker)
         dismiss(animated: true)

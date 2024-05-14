@@ -9,6 +9,10 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerStore = TrackerStore()
+
+    private var trackers = [Tracker]()
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
@@ -58,6 +62,7 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         setupNavigationBar()
         setupUI()
+        syncData()
         updateUI()
     }
     
@@ -73,8 +78,22 @@ final class TrackersViewController: UIViewController {
         filteredTrackers()
         updateUI()
     }
+    
+    private func syncData() {
+        trackerCategoryStore.delegate = self
+        trackerStore.delegate = self
+        fetchCategory()
+        if !categories.isEmpty {
+            visibleCategories = categories
+            collectionView.reloadData()
+        }
+        
+        //        collectionView.reloadData()
+        updateUI()
+    }
 
     private func filteredTrackers() {
+        
         let calendar = Calendar.current
         let selectedWeekDay = calendar.component(.weekday, from: currentDate) - 1
         let selectedDayString = WeekDay(rawValue: selectedWeekDay)?.stringValue ?? ""
@@ -85,7 +104,8 @@ final class TrackersViewController: UIViewController {
             }
             return !filteredTrackers.isEmpty ? TrackerCategory(title: category.title, trackers: filteredTrackers) : nil
         }
-            collectionView.reloadData()
+
+        collectionView.reloadData()
     }
     
     func addTracker(_ tracker: Tracker, to categoryIndex: Int) {
@@ -96,9 +116,19 @@ final class TrackersViewController: UIViewController {
             categories.append(newCategory)
         }
         visibleCategories = categories
+        
+        let category = ""
+        if trackerCategoryStore.fetchCategories().filter({$0.title == category}).count == 0 {
+            let newCategory = TrackerCategory(title: category, trackers: [])
+            trackerCategoryStore.addNewCategory(newCategory)
+        }
+
+        createCategoryAndTracker(tracker: tracker, with: category)
+        fetchCategory()
+        collectionView.reloadData()
         updateUI()
     }
-    
+        
     private func setupUI() {
         view.backgroundColor = .white
         
@@ -337,6 +367,41 @@ extension TrackersViewController: NewTrackerViewControllerDelegate {
     
     func didCreateNewTracker(_ tracker: Tracker) {
         addTracker(tracker, to: 0)
+    }
+}
+
+extension TrackersViewController: TrackerCategoryStoreDelegate {
+    func didUpdateCategories() {
+        collectionView.reloadData()
+    }
+}
+
+extension TrackersViewController {
+    private func fetchCategory() {
+        let coreDataCategories = trackerCategoryStore.fetchCategories()
+        categories = coreDataCategories.compactMap { coreDataCategory in
+            trackerCategoryStore.updateTrackerCategory(coreDataCategory)
+        }
+        
+        var trackers = [Tracker]()
+        
+        for visibleCategory in visibleCategories {
+            for tracker in visibleCategory.trackers {
+                let newTracker = Tracker(
+                    id: tracker.id,
+                    name: tracker.name,
+                    color: tracker.color,
+                    emoji: tracker.emoji,
+                    schedule: tracker.schedule)
+                trackers.append(newTracker)
+            }
+        }
+        
+        self.trackers = trackers
+    }
+    
+    private func createCategoryAndTracker(tracker: Tracker, with titleCategory: String) {
+        trackerCategoryStore.createCategoryAndTracker(tracker: tracker, with: titleCategory)
     }
 }
 

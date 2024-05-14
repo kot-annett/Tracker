@@ -11,6 +11,7 @@ final class TrackersViewController: UIViewController {
     
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerStore = TrackerStore()
+    private let trackerRecordStore = TrackerRecordStore()
 
     private var trackers = [Tracker]()
     private var categories: [TrackerCategory] = []
@@ -83,12 +84,12 @@ final class TrackersViewController: UIViewController {
         trackerCategoryStore.delegate = self
         trackerStore.delegate = self
         fetchCategory()
+        fetchRecord()
         if !categories.isEmpty {
             visibleCategories = categories
             collectionView.reloadData()
         }
         
-        //        collectionView.reloadData()
         updateUI()
     }
 
@@ -329,17 +330,18 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         if currentDate <= Date() {
             let trackerRecord = TrackerRecord(trackerID: id, date: datePicker.date)
             completedTrackers.insert(trackerRecord)
-            
+            createRecord(record: trackerRecord)
             collectionView.reloadItems(at: [indexPath])
         }
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers = completedTrackers.filter { trackerRecord in
-            !isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        if let trackerRecordToDelete = completedTrackers.first(where: { $0.trackerID == id }) {
+            completedTrackers.remove(trackerRecordToDelete)
+            deleteRecord(record: trackerRecordToDelete)
+            
+            collectionView.reloadItems(at: [indexPath])
         }
-        
-        collectionView.reloadItems(at: [indexPath])
     }
    
     func record(_ sender: Bool, _ cell: TrackerCollectionViewCell) {
@@ -402,6 +404,23 @@ extension TrackersViewController {
     
     private func createCategoryAndTracker(tracker: Tracker, with titleCategory: String) {
         trackerCategoryStore.createCategoryAndTracker(tracker: tracker, with: titleCategory)
+    }
+}
+
+extension TrackersViewController {
+    private func fetchRecord()  {
+        completedTrackers = trackerRecordStore.fetchRecords()
+        print(completedTrackers)
+    }
+    
+    private func createRecord(record: TrackerRecord)  {
+        trackerRecordStore.addNewRecord(from: record)
+        fetchRecord()
+    }
+    
+    private func deleteRecord(record: TrackerRecord)  {
+        trackerRecordStore.deleteTrackerRecord(trackerRecord: record)
+        fetchRecord()
     }
 }
 

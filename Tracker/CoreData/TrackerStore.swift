@@ -48,7 +48,6 @@ final class TrackerStore: NSObject {
     }
     
     func addTracker(from tracker: Tracker) -> TrackerCoreData? {
-//        let trackerCoreData = TrackerCoreData(context: context)
         guard let trackerCoreData = NSEntityDescription.entity(forEntityName: "TrackerCoreData", in: context) else { return nil }
         let newTracker = TrackerCoreData(entity: trackerCoreData, insertInto: context)
         newTracker.id = tracker.id
@@ -61,7 +60,6 @@ final class TrackerStore: NSObject {
     }
     
     func fetchTracker() -> [Tracker] {
-        //        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         let trackerCoreDataArray = try! context.fetch(fetchRequest)
         let trackers = trackerCoreDataArray.map { trackerCoreData in
@@ -80,17 +78,7 @@ final class TrackerStore: NSObject {
         let trackerCoreDataArray = try! context.fetch(fetchRequest)
         return trackerCoreDataArray
     }
-    
-//    func deleteTracker(tracker: Tracker) {
-//        // Получаем объект TrackerCoreData
-//        let tracker = fetchTrackerCoreData()
-//        
-//        // Удаляем объект из контекста и сохраняем контекст
-//        if let index = tracker.firstIndex(where: {$0.id == tracker.id}) {
-//            context.delete(tracker[index])
-//        }
-//    }
-    
+ 
     func changeTrackers(from trackersCoreData: TrackerCoreData) -> Tracker? {
         guard
             let id = trackersCoreData.id,
@@ -112,30 +100,3 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
         delegate?.didUpdateCategories()
     }
 }
-
-// ???
-//    func changeTracker(_ newTracker: Tracker, _ categoryName: String) throws {
-//        guard let tracker = fetchedResultsController.fetchedObjects?.first(where: {
-//            $0.id == newTracker.id
-//        }) else {
-//            print("Tracker with id \(newTracker.id) not found.")
-//            return
-//        }
-//        tracker.name = newTracker.name
-//        tracker.color = uiColorMarshalling.hexString(from: newTracker.color)
-//        tracker.schedule = newTracker.schedule
-//        tracker.emoji = newTracker.emoji
-//        tracker.category = TrackerCategoryStore().category(categoryName)
-//
-//        if let category = try TrackerCategoryStore(context: context).category(categoryName) {
-//                tracker.category = category
-//            } else {
-//                print("Category with name \(categoryName) not found.")
-//            }
-//
-//        do {
-//            try context.save()
-//        } catch {
-//            print("Failed to save context: \(error)")
-//        }
-//    }

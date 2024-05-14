@@ -48,7 +48,6 @@ final class TrackerCategoryStore: NSObject {
     }
 
     func addNewCategory( _ categoryName: TrackerCategory) {
-        //        let trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
         guard let trackerCategoryCoreData = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context) else { return }
         let newCategory = TrackerCategoryCoreData(entity: trackerCategoryCoreData, insertInto: context)
         newCategory.title = categoryName.title
@@ -86,9 +85,7 @@ final class TrackerCategoryStore: NSObject {
     }
     
     func addNewTrackerToCategory(_ tracker: Tracker, to trackerCategory: String) {
-//        let newTrackerCoreData = trackerStore.addTracker(from: tracker)
         let newTrackerCoreData = trackerStore.fetchTrackerCoreData()
-//        guard let category = fetchedResultsController.fetchedObjects?.first(where: { $0.title == trackerCategory }) else {}
         guard let currentCategory = category(with: trackerCategory) else { return }
         var currentTrackers = currentCategory.trackers?.allObjects as? [TrackerCoreData] ?? []
         if let index = newTrackerCoreData.firstIndex(where: {$0.id == tracker.id}) {
@@ -101,12 +98,6 @@ final class TrackerCategoryStore: NSObject {
     private func category(with categoryName: String) -> TrackerCategoryCoreData? {
         return fetchCategories().filter({$0.title == categoryName}).first ?? nil
     }
-    
-//    func category(_ categoryName: String) -> TrackerCategoryCoreData? {
-//        return fetchedResultsController.fetchedObjects?.first {
-//            $0.title == categoryName
-//        }
-//    }
     
     func deleteCategory(_ category: TrackerCategoryCoreData) {
         context.delete(category)

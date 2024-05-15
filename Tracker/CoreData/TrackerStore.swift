@@ -17,15 +17,18 @@ final class TrackerStore: NSObject {
     
     private let context: NSManagedObjectContext
     private let uiColorMarshalling = UIColorMarshalling()
-    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>!
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
     
     convenience override init() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("couldn't get app delegate")
+            preconditionFailure("couldn't get app delegate")
         }
         let context = appDelegate.persistentContainer.viewContext
-        
-        try! self.init(context: context)
+        do {
+            try self.init(context: context)
+        } catch {
+            preconditionFailure("Failed to initialize TrackerStore: \(error)")
+        }
     }
 
     init(context: NSManagedObjectContext) throws {
@@ -59,24 +62,32 @@ final class TrackerStore: NSObject {
         return newTracker
     }
     
-    func fetchTracker() -> [Tracker] {
+    func fetchTracker() throws -> [Tracker] {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        let trackerCoreDataArray = try! context.fetch(fetchRequest)
-        let trackers = trackerCoreDataArray.map { trackerCoreData in
-            return Tracker(
-                id: trackerCoreData.id ?? UUID(),
-                name: trackerCoreData.name ?? "",
-                color: uiColorMarshalling.color(from: trackerCoreData.color ?? ""),
-                emoji: trackerCoreData.emoji ?? "",
-                schedule: trackerCoreData.schedule ?? "")
+        do {
+            let trackerCoreDataArray = try context.fetch(fetchRequest)
+            let trackers = trackerCoreDataArray.map { trackerCoreData in
+                return Tracker(
+                    id: trackerCoreData.id ?? UUID(),
+                    name: trackerCoreData.name ?? "",
+                    color: uiColorMarshalling.color(from: trackerCoreData.color ?? ""),
+                    emoji: trackerCoreData.emoji ?? "",
+                    schedule: trackerCoreData.schedule ?? "")
+            }
+            return trackers
+        } catch {
+            throw StoreError.decodeError
         }
-        return trackers
     }
     
-    func fetchTrackerCoreData() -> [TrackerCoreData] {
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        let trackerCoreDataArray = try! context.fetch(fetchRequest)
-        return trackerCoreDataArray
+    func fetchTrackerCoreData() throws -> [TrackerCoreData] {
+        do {
+            let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+            let trackerCoreDataArray = try context.fetch(fetchRequest)
+            return trackerCoreDataArray
+        } catch {
+            throw StoreError.decodeError
+        }
     }
  
     func changeTrackers(from trackersCoreData: TrackerCoreData) -> Tracker? {

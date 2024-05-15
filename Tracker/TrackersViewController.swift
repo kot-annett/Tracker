@@ -110,26 +110,32 @@ final class TrackersViewController: UIViewController {
     }
     
     func addTracker(_ tracker: Tracker, to categoryIndex: Int) {
-        if categoryIndex < categories.count {
-            categories[categoryIndex].trackers.append(tracker)
-        } else {
-            let newCategory = TrackerCategory(title: "Новая категория", trackers: [tracker])
-            categories.append(newCategory)
+        do {
+            var categoryTitle = "Новая категория"
+            if categoryIndex < categories.count {
+                categories[categoryIndex].trackers.append(tracker)
+            } else {
+                let newCategory = TrackerCategory(
+                    title: categoryTitle,
+                    trackers: [tracker])
+                categories.append(newCategory)
+            }
+            visibleCategories = categories
+            
+            if try trackerCategoryStore.fetchCategories().filter({$0.title == categoryTitle}).count == 0 {
+                let newCategoryCoreData = TrackerCategory(title: categoryTitle, trackers: [])
+                try trackerCategoryStore.addNewCategory(newCategoryCoreData)
+            }
+            
+            createCategoryAndTracker(tracker: tracker, with: categoryTitle)
+            fetchCategory()
+            collectionView.reloadData()
+            updateUI()
+        } catch {
+            print("Error: \(error)")
         }
-        visibleCategories = categories
-        
-        let category = ""
-        if trackerCategoryStore.fetchCategories().filter({$0.title == category}).count == 0 {
-            let newCategory = TrackerCategory(title: category, trackers: [])
-            trackerCategoryStore.addNewCategory(newCategory)
-        }
-
-        createCategoryAndTracker(tracker: tracker, with: category)
-        fetchCategory()
-        collectionView.reloadData()
-        updateUI()
     }
-        
+    
     private func setupUI() {
         view.backgroundColor = .white
         
@@ -380,26 +386,30 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 
 extension TrackersViewController {
     private func fetchCategory() {
-        let coreDataCategories = trackerCategoryStore.fetchCategories()
-        categories = coreDataCategories.compactMap { coreDataCategory in
-            trackerCategoryStore.updateTrackerCategory(coreDataCategory)
-        }
-        
-        var trackers = [Tracker]()
-        
-        for visibleCategory in visibleCategories {
-            for tracker in visibleCategory.trackers {
-                let newTracker = Tracker(
-                    id: tracker.id,
-                    name: tracker.name,
-                    color: tracker.color,
-                    emoji: tracker.emoji,
-                    schedule: tracker.schedule)
-                trackers.append(newTracker)
+        do {
+            let coreDataCategories = try trackerCategoryStore.fetchCategories()
+            categories = coreDataCategories.compactMap { coreDataCategory in
+                trackerCategoryStore.updateTrackerCategory(coreDataCategory)
             }
+
+            var trackers = [Tracker]()
+            
+            for visibleCategory in visibleCategories {
+                for tracker in visibleCategory.trackers {
+                    let newTracker = Tracker(
+                        id: tracker.id,
+                        name: tracker.name,
+                        color: tracker.color,
+                        emoji: tracker.emoji,
+                        schedule: tracker.schedule)
+                    trackers.append(newTracker)
+                }
+            }
+            
+            self.trackers = trackers
+        } catch {
+            print("Error fetching categories: \(error)")
         }
-        
-        self.trackers = trackers
     }
     
     private func createCategoryAndTracker(tracker: Tracker, with titleCategory: String) {
@@ -409,18 +419,29 @@ extension TrackersViewController {
 
 extension TrackersViewController {
     private func fetchRecord()  {
-        completedTrackers = trackerRecordStore.fetchRecords()
-        print(completedTrackers)
+        do {
+            completedTrackers = try trackerRecordStore.fetchRecords()
+        } catch {
+            print("Ошибка при добавлении записи: \(error)")
+        }
     }
     
     private func createRecord(record: TrackerRecord)  {
-        trackerRecordStore.addNewRecord(from: record)
-        fetchRecord()
+        do {
+            try trackerRecordStore.addNewRecord(from: record)
+            fetchRecord()
+        } catch {
+            print("Ошибка при добавлении записи: \(error)")
+        }
     }
     
     private func deleteRecord(record: TrackerRecord)  {
-        trackerRecordStore.deleteTrackerRecord(trackerRecord: record)
-        fetchRecord()
+        do {
+            try trackerRecordStore.deleteTrackerRecord(trackerRecord: record)
+            fetchRecord()
+        } catch {
+            print("Ошибка при удалении записи: \(error)")
+        }
     }
 }
 

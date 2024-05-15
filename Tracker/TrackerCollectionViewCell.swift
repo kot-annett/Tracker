@@ -135,19 +135,18 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let daysForms = ["дней", "день", "дня"]
         let remainder100 = count % 100
         let remainder10 = count % 10
-        // Индекс формы слова "день" в массиве, который будем использовать
         var formIndex: Int
         
         switch remainder100 {
-        case 11...14: // Если остаток от 11 до 14, используем форму "дней"
+        case 11...14:
             formIndex = 0
         default:
             switch remainder10 {
-            case 1: // Если остаток равен 1 и число не оканчивается на 11, используем форму "день"
+            case 1:
                 formIndex = 1
-            case 2...4: // Если остаток от 2 до 4 и число не оканчивается на 12, 13, 14, используем форму "дня"
+            case 2...4:
                 formIndex = 2
-            default: // Во всех остальных случаях, используем форму "дней"
+            default: 
                 formIndex = 0
             }
         }

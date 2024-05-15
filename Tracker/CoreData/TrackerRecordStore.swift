@@ -11,14 +11,18 @@ import CoreData
 final class TrackerRecordStore: NSObject, NSFetchedResultsControllerDelegate {
     private let context: NSManagedObjectContext
     
-    private var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData>!
+    private var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData>?
     
     convenience override init() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("couldn't get app delegate")
+            preconditionFailure("couldn't get app delegate")
         }
         let context = appDelegate.persistentContainer.viewContext
-        try! self.init(context: context)
+        do {
+            try self.init(context: context)
+        } catch {
+            preconditionFailure("Failed to initialize TrackerRecordStore: \(error)")
+        }
     }
     
     init(context: NSManagedObjectContext) throws {
@@ -42,7 +46,7 @@ final class TrackerRecordStore: NSObject, NSFetchedResultsControllerDelegate {
     
     var completedTrackers: Set<TrackerRecord> {
         guard
-            let objects = fetchedResultsController.fetchedObjects,
+            let objects = fetchedResultsController?.fetchedObjects,
             let completedTrackers = try? objects.map({ try completedTracker(from: $0)})
         else { return [] }
         return Set(completedTrackers)
@@ -61,46 +65,44 @@ final class TrackerRecordStore: NSObject, NSFetchedResultsControllerDelegate {
         )
     }
     
-    func addNewRecord(from trackerRecord: TrackerRecord) {
+    func addNewRecord(from trackerRecord: TrackerRecord) throws {
         guard let entity = NSEntityDescription.entity(forEntityName: "TrackerRecordCoreData", in: context) else { return }
         let newRecord = TrackerRecordCoreData(entity: entity, insertInto: context)
         newRecord.trackerID = trackerRecord.trackerID
         newRecord.date = trackerRecord.date
-        try! context.save()
+        do {
+            try context.save()
+        } catch {
+            throw StoreError.decodeError
+        }
     }
     
-    func deleteTrackerRecord(trackerRecord: TrackerRecord) {
-        guard let record = fetchedResultsController.fetchedObjects?.first(where: {
+    func deleteTrackerRecord(trackerRecord: TrackerRecord) throws {
+        guard let record = fetchedResultsController?.fetchedObjects?.first(where: {
             $0.trackerID == trackerRecord.trackerID && $0.date == trackerRecord.date
         }) else { return }
         context.delete(record)
-        try! context.save()
-    }
-    
-//    func deleteAllRecordFor(tracker: Tracker) {
-//        let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
-//        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
-//        do {
-//            let records = try context.fetch(fetchRequest)
-//            for recordToDelete in records {
-//                context.delete(recordToDelete)
-//            }
-//            try context.save()
-//        } catch {
-//            print("Error deleting records: \(error.localizedDescription)")
-//        }
-//    }
-    
-    func fetchRecords() -> Set<TrackerRecord> {
-        let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
-        let trackerRecordCoreDataArray = try! context.fetch(fetchRequest)
-        let trackerRecords = trackerRecordCoreDataArray.map { trackerRecordCoreData in
-            return TrackerRecord(
-                trackerID: trackerRecordCoreData.trackerID ?? UUID(),
-                date: trackerRecordCoreData.date ?? Date()
-            )
+        do {
+            try context.save()
+        } catch {
+            throw StoreError.decodeError
         }
-        return Set(trackerRecords)
+    }
+  
+    func fetchRecords() throws -> Set<TrackerRecord> {
+        let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
+        do {
+            let trackerRecordCoreDataArray = try context.fetch(fetchRequest)
+            let trackerRecords = trackerRecordCoreDataArray.map { trackerRecordCoreData in
+                return TrackerRecord(
+                    trackerID: trackerRecordCoreData.trackerID ?? UUID(),
+                    date: trackerRecordCoreData.date ?? Date()
+                )
+            }
+            return Set(trackerRecords)
+        } catch {
+            throw StoreError.decodeError
+        }
     }
 }
 

@@ -18,14 +18,18 @@ final class TrackerCategoryStore: NSObject {
     
     private let trackerStore = TrackerStore()
     private let context: NSManagedObjectContext
-    private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>?
     
     convenience override init() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("couldn't get app delegate")
+            preconditionFailure("couldn't get app delegate")
         }
         let context = appDelegate.persistentContainer.viewContext
-        try! self.init(context: context)
+        do {
+            try self.init(context: context)
+        } catch {
+            preconditionFailure("Failed to initialize TrackerCategoryStore: \(error)")
+        }
     }
 
     init(context: NSManagedObjectContext) throws {
@@ -47,7 +51,7 @@ final class TrackerCategoryStore: NSObject {
         try controller.performFetch()
     }
 
-    func addNewCategory( _ categoryName: TrackerCategory) {
+    func addNewCategory( _ categoryName: TrackerCategory) throws {
         guard let trackerCategoryCoreData = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context) else { return }
         let newCategory = TrackerCategoryCoreData(entity: trackerCategoryCoreData, insertInto: context)
         newCategory.title = categoryName.title
@@ -55,12 +59,16 @@ final class TrackerCategoryStore: NSObject {
         do {
             try context.save()
         } catch {
-            print("Failed to save context: \(error)")
+            throw StoreError.decodeError
         }
     }
     
-    func fetchCategories() -> [TrackerCategoryCoreData] {
-        return try! context.fetch(NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData"))
+    func fetchCategories() throws -> [TrackerCategoryCoreData] {
+        do {
+            return try context.fetch(NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData"))
+        } catch {
+            throw StoreError.decodeError
+        }
     }
     
     func updateTrackerCategory(_ category: TrackerCategoryCoreData) -> TrackerCategory? {
@@ -81,30 +89,38 @@ final class TrackerCategoryStore: NSObject {
         var currentTrackers = currentCategory.trackers?.allObjects as? [TrackerCoreData] ?? []
         currentTrackers.append(trackerCoreData)
         currentCategory.trackers = NSSet(array: currentTrackers)
-        try! context.save()
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save context: \(error)")
+        }
     }
     
-    func addNewTrackerToCategory(_ tracker: Tracker, to trackerCategory: String) {
-        let newTrackerCoreData = trackerStore.fetchTrackerCoreData()
+    func addNewTrackerToCategory(_ tracker: Tracker, to trackerCategory: String) throws {
+        let newTrackerCoreData = try trackerStore.fetchTrackerCoreData()
         guard let currentCategory = category(with: trackerCategory) else { return }
         var currentTrackers = currentCategory.trackers?.allObjects as? [TrackerCoreData] ?? []
         if let index = newTrackerCoreData.firstIndex(where: {$0.id == tracker.id}) {
             currentTrackers.append(newTrackerCoreData[index])
         }
         currentCategory.trackers = NSSet(array: currentTrackers)
-        try! context.save()
+        do {
+            try context.save()
+        } catch {
+            throw StoreError.decodeError
+        }
     }
     
     private func category(with categoryName: String) -> TrackerCategoryCoreData? {
-        return fetchCategories().filter({$0.title == categoryName}).first ?? nil
+        return try? fetchCategories().filter({$0.title == categoryName}).first ?? nil
     }
     
-    func deleteCategory(_ category: TrackerCategoryCoreData) {
+    func deleteCategory(_ category: TrackerCategoryCoreData) throws {
         context.delete(category)
         do {
             try context.save()
         } catch {
-            print("Failed to delete tracker category: \(error)")
+            throw StoreError.decodeError
         }
     }
 }

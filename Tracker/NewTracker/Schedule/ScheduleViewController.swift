@@ -113,9 +113,6 @@ extension ScheduleViewController: UITableViewDataSource {
             isSwithcOn: selectedDays[WeekDay.allCases[indexPath.row]] ?? false
         )
         
-//        cell.textLabel?.text = titles[indexPath.row]
-        
-        print("Cell for row \(indexPath.row) configured")
         cell.selectionStyle = .none
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         

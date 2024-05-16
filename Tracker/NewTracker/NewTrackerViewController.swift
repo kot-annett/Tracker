@@ -83,13 +83,11 @@ final class NewTrackerViewController: UIViewController {
         let newHabitViewController = NewHabitViewController()
         newHabitViewController.delegate = delegate
         navigationController?.pushViewController(newHabitViewController, animated: true)
-        print("Привычка button tapped")
     }
     
     @objc private func eventButtonTapped() {
         let newEventViewController = NewEventViewController()
         newEventViewController.delegate = delegate
         navigationController?.pushViewController(newEventViewController, animated: true)
-        print("Нерегулярное событие button tapped")
     }
 }

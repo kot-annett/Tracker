@@ -9,6 +9,11 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerStore = TrackerStore()
+    private let trackerRecordStore = TrackerRecordStore()
+
+    private var trackers = [Tracker]()
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
@@ -58,6 +63,7 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         setupNavigationBar()
         setupUI()
+        syncData()
         updateUI()
     }
     
@@ -73,8 +79,22 @@ final class TrackersViewController: UIViewController {
         filteredTrackers()
         updateUI()
     }
+    
+    private func syncData() {
+        trackerCategoryStore.delegate = self
+        trackerStore.delegate = self
+        fetchCategory()
+        fetchRecord()
+        if !categories.isEmpty {
+            visibleCategories = categories
+            collectionView.reloadData()
+        }
+        
+        updateUI()
+    }
 
     private func filteredTrackers() {
+        
         let calendar = Calendar.current
         let selectedWeekDay = calendar.component(.weekday, from: currentDate) - 1
         let selectedDayString = WeekDay(rawValue: selectedWeekDay)?.stringValue ?? ""
@@ -85,18 +105,35 @@ final class TrackersViewController: UIViewController {
             }
             return !filteredTrackers.isEmpty ? TrackerCategory(title: category.title, trackers: filteredTrackers) : nil
         }
-            collectionView.reloadData()
+
+        collectionView.reloadData()
     }
     
     func addTracker(_ tracker: Tracker, to categoryIndex: Int) {
-        if categoryIndex < categories.count {
-            categories[categoryIndex].trackers.append(tracker)
-        } else {
-            let newCategory = TrackerCategory(title: "Новая категория", trackers: [tracker])
-            categories.append(newCategory)
+        do {
+            var categoryTitle = "Новая категория"
+            if categoryIndex < categories.count {
+                categories[categoryIndex].trackers.append(tracker)
+            } else {
+                let newCategory = TrackerCategory(
+                    title: categoryTitle,
+                    trackers: [tracker])
+                categories.append(newCategory)
+            }
+            visibleCategories = categories
+            
+            if try trackerCategoryStore.fetchCategories().filter({$0.title == categoryTitle}).count == 0 {
+                let newCategoryCoreData = TrackerCategory(title: categoryTitle, trackers: [])
+                try trackerCategoryStore.addNewCategory(newCategoryCoreData)
+            }
+            
+            createCategoryAndTracker(tracker: tracker, with: categoryTitle)
+            fetchCategory()
+            collectionView.reloadData()
+            updateUI()
+        } catch {
+            print("Error: \(error)")
         }
-        visibleCategories = categories
-        updateUI()
     }
     
     private func setupUI() {
@@ -299,17 +336,18 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         if currentDate <= Date() {
             let trackerRecord = TrackerRecord(trackerID: id, date: datePicker.date)
             completedTrackers.insert(trackerRecord)
-            
+            createRecord(record: trackerRecord)
             collectionView.reloadItems(at: [indexPath])
         }
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers = completedTrackers.filter { trackerRecord in
-            !isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        if let trackerRecordToDelete = completedTrackers.first(where: { $0.trackerID == id }) {
+            completedTrackers.remove(trackerRecordToDelete)
+            deleteRecord(record: trackerRecordToDelete)
+            
+            collectionView.reloadItems(at: [indexPath])
         }
-        
-        collectionView.reloadItems(at: [indexPath])
     }
    
     func record(_ sender: Bool, _ cell: TrackerCollectionViewCell) {
@@ -337,6 +375,73 @@ extension TrackersViewController: NewTrackerViewControllerDelegate {
     
     func didCreateNewTracker(_ tracker: Tracker) {
         addTracker(tracker, to: 0)
+    }
+}
+
+extension TrackersViewController: TrackerCategoryStoreDelegate {
+    func didUpdateCategories() {
+        collectionView.reloadData()
+    }
+}
+
+extension TrackersViewController {
+    private func fetchCategory() {
+        do {
+            let coreDataCategories = try trackerCategoryStore.fetchCategories()
+            categories = coreDataCategories.compactMap { coreDataCategory in
+                trackerCategoryStore.updateTrackerCategory(coreDataCategory)
+            }
+
+            var trackers = [Tracker]()
+            
+            for visibleCategory in visibleCategories {
+                for tracker in visibleCategory.trackers {
+                    let newTracker = Tracker(
+                        id: tracker.id,
+                        name: tracker.name,
+                        color: tracker.color,
+                        emoji: tracker.emoji,
+                        schedule: tracker.schedule)
+                    trackers.append(newTracker)
+                }
+            }
+            
+            self.trackers = trackers
+        } catch {
+            print("Error fetching categories: \(error)")
+        }
+    }
+    
+    private func createCategoryAndTracker(tracker: Tracker, with titleCategory: String) {
+        trackerCategoryStore.createCategoryAndTracker(tracker: tracker, with: titleCategory)
+    }
+}
+
+extension TrackersViewController {
+    private func fetchRecord()  {
+        do {
+            completedTrackers = try trackerRecordStore.fetchRecords()
+        } catch {
+            print("Ошибка при добавлении записи: \(error)")
+        }
+    }
+    
+    private func createRecord(record: TrackerRecord)  {
+        do {
+            try trackerRecordStore.addNewRecord(from: record)
+            fetchRecord()
+        } catch {
+            print("Ошибка при добавлении записи: \(error)")
+        }
+    }
+    
+    private func deleteRecord(record: TrackerRecord)  {
+        do {
+            try trackerRecordStore.deleteTrackerRecord(trackerRecord: record)
+            fetchRecord()
+        } catch {
+            print("Ошибка при удалении записи: \(error)")
+        }
     }
 }
 

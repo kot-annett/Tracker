@@ -124,6 +124,7 @@ final class NewHabitViewController: UIViewController {
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
         checkCreateButtonAvailability()
+        nameTextField.delegate = self
     }
     
     @objc private func cancelButtonTapped() {
@@ -145,12 +146,14 @@ final class NewHabitViewController: UIViewController {
             newTrackerSchedule = [date]
         }
         
+        let formattedSchedule = newTrackerSchedule.joined(separator: ", ")
+        
         let newTracker = Tracker(
             id: UUID(),
             name: newTrackerName,
             color: selectedColor ?? .orange,
             emoji: selectedEmoji ?? Constant.randomEmoji(),
-            schedule: newTrackerSchedule
+            schedule: formattedSchedule
         )
         delegate?.didCreateNewTracker(newTracker)
         dismiss(animated: true)
@@ -247,13 +250,13 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
             if selectedDaysArray.isEmpty {
                 cell.setDescription("") 
             } else if selectedDaysArray.count == WeekDay.allCases.count {
-                cell.setDescription("Каждый день") // Отображаем "Каждый день", если выбраны все дни
+                cell.setDescription("Каждый день") 
             } else {
                 let selectedDaysString = selectedDaysArray.map { $0.stringValue }.joined(separator: ", ")
-                cell.setDescription(selectedDaysString) // Отображаем выбранные дни
+                cell.setDescription(selectedDaysString)
             }
         } else {
-            cell.setDescription("") // Очищаем описание для других ячеек
+            cell.setDescription("")
         }
         
         return cell
@@ -393,4 +396,11 @@ extension NewHabitViewController: ScheduleViewControllerDelegate {
             selectedDays = days
             tableView.reloadData()
         }
+}
+
+extension NewHabitViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
 }

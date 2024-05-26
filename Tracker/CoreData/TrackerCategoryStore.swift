@@ -13,7 +13,7 @@ protocol TrackerCategoryStoreDelegate: AnyObject {
 }
 
 final class TrackerCategoryStore: NSObject {
-    
+    private var categories: [TrackerCategory] = []
     public weak var delegate: TrackerCategoryStoreDelegate?
     
     private let trackerStore = TrackerStore()
@@ -50,31 +50,57 @@ final class TrackerCategoryStore: NSObject {
         self.fetchedResultsController = controller
         try controller.performFetch()
     }
-
-    func addNewCategory( _ categoryName: TrackerCategory) throws {
-        guard let trackerCategoryCoreData = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context) else { return }
-        let newCategory = TrackerCategoryCoreData(entity: trackerCategoryCoreData, insertInto: context)
-        newCategory.title = categoryName.title
-        newCategory.trackers = NSSet(array: [])
+    
+    var isEmpty: Bool {
         do {
-            try context.save()
+            let request = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
+            let count  = try context.count(for: request)
+            return count == 0
         } catch {
-            throw StoreError.decodeError
+            return true
         }
     }
     
+    func addNewCategory( _ categoryName: TrackerCategory) throws {
+        guard let trackerCategoryCoreData = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context) else { return }
+        
+        // Проверка на уникальность
+        if try context.fetch(TrackerCategoryCoreData.fetchRequest()).contains(where: { $0.title == categoryName.title }) {
+            print("Category already exists: \(categoryName.title)")
+            return
+        }
+        
+        let newCategory = TrackerCategoryCoreData(entity: trackerCategoryCoreData, insertInto: context)
+        newCategory.title = categoryName.title
+        newCategory.trackers = []
+//        newCategory.trackers = NSSet(array: [])
+        do {
+            try context.save()
+            print("Context saved successfully")
+        } catch {
+            context.rollback()
+            throw StoreError.decodeError
+        }
+    }
+ 
     func fetchCategories() throws -> [TrackerCategoryCoreData] {
         do {
-            return try context.fetch(NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData"))
+            let categories = try context.fetch(NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData"))
+            print("Fetched from CoreData: \(categories.map { $0.title ?? "nil" })")
+            return categories
         } catch {
             throw StoreError.decodeError
         }
+//        do {
+//            return try context.fetch(NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData"))
+//        } catch {
+//            throw StoreError.decodeError
+//        }
     }
     
     func updateTrackerCategory(_ category: TrackerCategoryCoreData) -> TrackerCategory? {
         guard let newTitle = category.title else { return nil }
         guard let trackers = category.trackers else { return nil }
-        
         return TrackerCategory(title: newTitle, trackers: trackers.compactMap { coreDataTracker -> Tracker? in
             if let coreDataTracker = coreDataTracker as? TrackerCoreData {
                 return trackerStore.changeTrackers(from: coreDataTracker)
@@ -111,7 +137,7 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
-    private func category(with categoryName: String) -> TrackerCategoryCoreData? {
+    func category(with categoryName: String) -> TrackerCategoryCoreData? {
         return try? fetchCategories().filter({$0.title == categoryName}).first ?? nil
     }
     

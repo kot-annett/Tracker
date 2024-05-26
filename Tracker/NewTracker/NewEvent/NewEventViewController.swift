@@ -15,6 +15,7 @@ final class NewEventViewController: UIViewController {
     private let titles = ["Категория"]
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
+    private var categoryName: String = ""
     
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -41,6 +42,7 @@ final class NewEventViewController: UIViewController {
         let tableView = UITableView()
         tableView.layer.cornerRadius = 16
         tableView.isScrollEnabled = false
+        tableView.separatorStyle = .none
         tableView.register(NewEventTableViewCell.self, forCellReuseIdentifier: NewEventTableViewCell.reuseIdentifier)
         return tableView
     }()
@@ -133,7 +135,8 @@ final class NewEventViewController: UIViewController {
             emoji: selectedEmoji ?? Constant.randomEmoji(),
             schedule: ""
         )
-        delegate?.didCreateNewTracker(newTracker)
+        let newCategory = TrackerCategory(title: categoryName, trackers: [newTracker])
+        delegate?.didCreateNewTracker(newTracker, newCategory)
         dismiss(animated: true)
     }
     
@@ -221,8 +224,18 @@ extension NewEventViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         cell.setTitle(titles[indexPath.row])
+        cell.setDescription(categoryName)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let trackerCategoryStore = TrackerCategoryStore()
+        let categoryViewModel = CategoryViewModel(trackerCategoryStore: trackerCategoryStore)
+        let categoryVC = CategoryViewController(viewModel: categoryViewModel)
+        categoryVC.selectedCategory = categoryName
+        categoryVC.delegate = self
+        navigationController?.pushViewController(categoryVC, animated: true)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -335,6 +348,13 @@ extension NewEventViewController: UICollectionViewDelegate {
             break
         }
         checkCreateButtonAvailability()
+    }
+}
+
+extension NewEventViewController: CategoryViewControllerDelegate {
+    func didSelectCategory(_ category: String) {
+        categoryName = category
+        tableView.reloadData()
     }
 }
 

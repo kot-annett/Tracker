@@ -65,7 +65,6 @@ final class CategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
-//        viewModel = CategoryViewModel(trackerCategoryStore: TrackerCategoryStore())
         setupBindings()
         tableView.dataSource = self
         tableView.delegate = self

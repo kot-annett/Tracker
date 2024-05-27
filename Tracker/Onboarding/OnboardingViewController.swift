@@ -52,13 +52,6 @@ final class OnboardingViewController: UIPageViewController {
     
     @objc private func enterButtonTapped() {
         onEnterButtonTapped?()
-//        let userDefaults = UserDefaults.standard
-//        userDefaults.set(true, forKey: "hasCompletedOnboarding")
-//        
-//        guard let window = UIApplication.shared.windows.first else {
-//            fatalError("Invalid Configuration")
-//        }
-//        window.rootViewController = TabBarController()
     }
     
     @objc private func pageControlTapped(_ sender: UIPageControl) {

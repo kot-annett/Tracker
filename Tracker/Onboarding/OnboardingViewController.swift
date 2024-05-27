@@ -13,7 +13,7 @@ final class OnboardingViewController: UIPageViewController {
     private lazy var pages: [UIViewController] = {
         return [
             PageContentViewController(imageName: "onboardingBlue", labelText: "Отслеживайте только то, что хотите"),
-            PageContentViewController(imageName: "onboardingRed", labelText: "Даже если это не литры воды и йога")
+            PageContentViewController(imageName: "onboardingRedView", labelText: "Даже если это не литры воды и йога")
         ]
     }()
     

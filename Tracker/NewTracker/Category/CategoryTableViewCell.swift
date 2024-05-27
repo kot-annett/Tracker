@@ -18,7 +18,7 @@ final class CategoryTableViewCell: UITableViewCell {
         return label
     }()
     
-    let checkbox: UIImageView = {
+    private let checkbox: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "checkmark"))
         return imageView
     }()
@@ -52,7 +52,7 @@ final class CategoryTableViewCell: UITableViewCell {
     private func setupContentView() {
         backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
         selectionStyle = .none
-        textLabel?.font = UIFont(name: "SFPro-Medium", size: 17)
+        textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         textLabel?.textColor = .black
     }
 }

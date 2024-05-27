@@ -14,12 +14,12 @@ protocol CategoryViewControllerDelegate: AnyObject {
 final class CategoryViewController: UIViewController {
     weak var delegate: CategoryViewControllerDelegate?
     var selectedCategory: String = ""
-    private var viewModel: CategoryViewModel
+    private var viewModel: CategoryViewModelProtocol
     
-    init(viewModel: CategoryViewModel) {
-            self.viewModel = viewModel
-            super.init(nibName: nil, bundle: nil)
-        }
+    init(viewModel: CategoryViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -34,7 +34,7 @@ final class CategoryViewController: UIViewController {
     private let placeholderLabel: UILabel = {
         let label = UILabel()
         label.text = "Привычки и события можно объединить по смыслу"
-        label.font = UIFont(name: "SFPro-Medium", size: 12)
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.numberOfLines = 2
         label.textAlignment = .center
         return label
@@ -65,7 +65,7 @@ final class CategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
-        viewModel = CategoryViewModel(trackerCategoryStore: TrackerCategoryStore())
+//        viewModel = CategoryViewModel(trackerCategoryStore: TrackerCategoryStore())
         setupBindings()
         tableView.dataSource = self
         tableView.delegate = self
@@ -103,8 +103,8 @@ final class CategoryViewController: UIViewController {
             
             placeholderLabel.topAnchor.constraint(equalTo: placeholderImageView.bottomAnchor, constant: 10),
             placeholderLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            placeholderLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            placeholderLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 65),
+            placeholderLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -65),
             
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 27),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -117,7 +117,7 @@ final class CategoryViewController: UIViewController {
             addCategoryButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
-
+    
     private func setupNavigationBar() {
         navigationItem.title = "Категория"
         navigationController?.isNavigationBarHidden = false
@@ -191,6 +191,6 @@ extension CategoryViewController: UITableViewDelegate {
 extension CategoryViewController: NewCategoryViewControllerDelegate {
     func didAddNewCategory(_ category: TrackerCategory) {
         viewModel.addCategory(category)
-       updateUI()
+        updateUI()
     }
 }

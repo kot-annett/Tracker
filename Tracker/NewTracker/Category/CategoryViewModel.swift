@@ -7,8 +7,14 @@
 
 import Foundation
 
-final class CategoryViewModel {
-    typealias Binding<T> = (T) -> Void
+protocol CategoryViewModelProtocol {
+    var categories: [TrackerCategory] { get }
+    var categoryBinding: (([TrackerCategory]) -> Void)? { get set }
+    func fetchCategories()
+    func addCategory(_ category: TrackerCategory)
+}
+
+final class CategoryViewModel: CategoryViewModelProtocol {
     
     private let trackerCategoryStore: TrackerCategoryStore
     private(set) var categories: [TrackerCategory] = [] {
@@ -26,9 +32,7 @@ final class CategoryViewModel {
     func fetchCategories() {
         do {
             let fetchedCategories = try trackerCategoryStore.fetchCategories()
-            print("Fetched categories: \(fetchedCategories.map { $0.title ?? "nil" })")
             categories = fetchedCategories.compactMap { trackerCategoryStore.updateTrackerCategory($0) }
-            print("Categories after update: \(categories.map { $0.title })")
         } catch {
             print("Error fetching categories: \(error)")
         }

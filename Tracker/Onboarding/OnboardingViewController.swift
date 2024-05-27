@@ -8,50 +8,13 @@
 import UIKit
 
 final class OnboardingViewController: UIPageViewController {
+    var onEnterButtonTapped: (() -> Void)?
+    
     private lazy var pages: [UIViewController] = {
-        return [blueViewController, redViewController]
-    }()
-    
-    private lazy var blueViewController: UIViewController = {
-        let vc = UIViewController()
-        let imageView = UIImageView(frame: view.bounds)
-        imageView.contentMode = .scaleAspectFit
-        imageView.clipsToBounds = true
-        imageView.image = UIImage(named: "onboardingBlue")
-        imageView.center = view.center
-        vc.view.addSubview(imageView)
-        return vc
-    }()
-    
-    private lazy var redViewController: UIViewController = {
-        let vc = UIViewController()
-        let imageView = UIImageView(frame: view.bounds)
-        imageView.contentMode = .scaleAspectFit
-        imageView.clipsToBounds = true
-        imageView.image = UIImage(named: "onboardingRed")
-        imageView.center = view.center
-        vc.view.addSubview(imageView)
-        return vc
-    }()
-    
-    private lazy var labelBlue: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 32, weight: .bold)
-        label.textColor = .black
-        label.text = "Отслеживайте только то, что хотите"
-        label.numberOfLines = 2
-        label.textAlignment = .center
-        return label
-    }()
-    
-    private lazy var labelRed: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 32, weight: .bold)
-        label.textColor = .black
-        label.text = "Даже если это не литры воды и йога"
-        label.numberOfLines = 2
-        label.textAlignment = .center
-        return label
+        return [
+            PageContentViewController(imageName: "onboardingBlue", labelText: "Отслеживайте только то, что хотите"),
+            PageContentViewController(imageName: "onboardingRed", labelText: "Даже если это не литры воды и йога")
+        ]
     }()
     
     private lazy var pageControl: UIPageControl = {
@@ -68,7 +31,7 @@ final class OnboardingViewController: UIPageViewController {
         let button = UIButton()
         button.backgroundColor = .black
         button.layer.cornerRadius = 16
-        button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(.white, for: .normal)
         button.setTitle("Вот это технологии!", for: .normal)
         button.addTarget(self, action: #selector(enterButtonTapped), for: .touchUpInside)
@@ -88,10 +51,14 @@ final class OnboardingViewController: UIPageViewController {
     }
     
     @objc private func enterButtonTapped() {
-        guard let window = UIApplication.shared.windows.first else {
-            fatalError("Invalid Configuration")
-        }
-        window.rootViewController = TabBarController()
+        onEnterButtonTapped?()
+//        let userDefaults = UserDefaults.standard
+//        userDefaults.set(true, forKey: "hasCompletedOnboarding")
+//        
+//        guard let window = UIApplication.shared.windows.first else {
+//            fatalError("Invalid Configuration")
+//        }
+//        window.rootViewController = TabBarController()
     }
     
     @objc private func pageControlTapped(_ sender: UIPageControl) {
@@ -100,34 +67,12 @@ final class OnboardingViewController: UIPageViewController {
     }
     
     private func setupUI() {
-//        [blueViewController, redViewController].forEach { addChild($0) }
-//        [blueViewController.view, redViewController.view].forEach {
-//            view.addSubview($0)
-//        }
-        
         [pageControl, enterButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
         
-        blueViewController.view.addSubview(labelBlue)
-        labelBlue.translatesAutoresizingMaskIntoConstraints = false
-        
-        redViewController.view.addSubview(labelRed)
-        labelRed.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
-            labelBlue.centerXAnchor.constraint(equalTo: blueViewController.view.centerXAnchor),
-            labelBlue.bottomAnchor.constraint(equalTo: blueViewController.view.safeAreaLayoutGuide.bottomAnchor, constant: -320),
-            labelBlue.leadingAnchor.constraint(equalTo: blueViewController.view.leadingAnchor, constant: 16),
-            labelBlue.trailingAnchor.constraint(equalTo: blueViewController.view.trailingAnchor, constant: -16),
-            
-            labelRed.centerXAnchor.constraint(equalTo: redViewController.view.centerXAnchor),
-            labelRed.bottomAnchor.constraint(equalTo: redViewController.view.safeAreaLayoutGuide.bottomAnchor, constant: -320),
-            labelRed.leadingAnchor.constraint(equalTo: redViewController.view.leadingAnchor, constant: 16),
-            labelRed.trailingAnchor.constraint(equalTo: redViewController.view.trailingAnchor, constant: -16),
-            
-        
             pageControl.bottomAnchor.constraint(equalTo: enterButton.topAnchor, constant: -24),
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
@@ -147,12 +92,11 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
                 return nil
             }
             let previousIndex = viewControllerIndex - 1
-
+            
             guard previousIndex >= 0 else {
-//                return pages.last
                 return nil
             }
-
+            
             return pages[previousIndex]
         }
     
@@ -163,12 +107,11 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
                 return nil
             }
             let nextIndex = viewControllerIndex + 1
-
+            
             guard nextIndex < pages.count else {
                 return nil
-//                return pages.first
             }
-
+            
             return pages[nextIndex]
         }
 }

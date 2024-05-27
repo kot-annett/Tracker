@@ -63,8 +63,7 @@ final class TrackerCategoryStore: NSObject {
     
     func addNewCategory( _ categoryName: TrackerCategory) throws {
         guard let trackerCategoryCoreData = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context) else { return }
-        
-        // Проверка на уникальность
+
         if try context.fetch(TrackerCategoryCoreData.fetchRequest()).contains(where: { $0.title == categoryName.title }) {
             print("Category already exists: \(categoryName.title)")
             return
@@ -73,7 +72,6 @@ final class TrackerCategoryStore: NSObject {
         let newCategory = TrackerCategoryCoreData(entity: trackerCategoryCoreData, insertInto: context)
         newCategory.title = categoryName.title
         newCategory.trackers = []
-//        newCategory.trackers = NSSet(array: [])
         do {
             try context.save()
             print("Context saved successfully")
@@ -86,16 +84,10 @@ final class TrackerCategoryStore: NSObject {
     func fetchCategories() throws -> [TrackerCategoryCoreData] {
         do {
             let categories = try context.fetch(NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData"))
-            print("Fetched from CoreData: \(categories.map { $0.title ?? "nil" })")
             return categories
         } catch {
             throw StoreError.decodeError
         }
-//        do {
-//            return try context.fetch(NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData"))
-//        } catch {
-//            throw StoreError.decodeError
-//        }
     }
     
     func updateTrackerCategory(_ category: TrackerCategoryCoreData) -> TrackerCategory? {

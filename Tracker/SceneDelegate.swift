@@ -21,18 +21,35 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         self.window = window
         window.makeKeyAndVisible()
-        
-        func showOnboardingOrApp() -> UIViewController {
-            var rootViewController = UIViewController()
-            if trackerCategoryStore.isEmpty {
-                    rootViewController = OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
-            } else {
-                rootViewController = TabBarController()
-            }
-            return rootViewController
-        }
     }
-
+        
+        private func showOnboardingOrApp() -> UIViewController {
+            let userDefaults = UserDefaults.standard
+            let hasCompletedOnboarding = userDefaults.bool(forKey: "hasCompletedOnboarding")
+            
+            if hasCompletedOnboarding {
+                return TabBarController()
+            } else {
+                let onboardingVC = OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
+                onboardingVC.onEnterButtonTapped = {
+                    self.completeOnboarding()
+                }
+                return onboardingVC
+            }
+        }
+//            } else {
+//                return OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
+//            }
+        
+        
+        private func completeOnboarding() {
+            let userDefaults = UserDefaults.standard
+            userDefaults.set(true, forKey: "hasCompletedOnboarding")
+            
+            window?.rootViewController = TabBarController()
+        }
+    
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.

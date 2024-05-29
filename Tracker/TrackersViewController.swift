@@ -109,25 +109,24 @@ final class TrackersViewController: UIViewController {
         collectionView.reloadData()
     }
     
-    func addTracker(_ tracker: Tracker, to categoryIndex: Int) {
+    func addTracker(_ tracker: Tracker, to category: TrackerCategory) {
         do {
-            var categoryTitle = "Новая категория"
-            if categoryIndex < categories.count {
+            if let categoryIndex = categories.firstIndex(where: { $0.title == category.title }) {
                 categories[categoryIndex].trackers.append(tracker)
             } else {
                 let newCategory = TrackerCategory(
-                    title: categoryTitle,
+                    title: category.title,
                     trackers: [tracker])
                 categories.append(newCategory)
             }
             visibleCategories = categories
             
-            if try trackerCategoryStore.fetchCategories().filter({$0.title == categoryTitle}).count == 0 {
-                let newCategoryCoreData = TrackerCategory(title: categoryTitle, trackers: [])
+            if try trackerCategoryStore.fetchCategories().filter({$0.title == category.title}).count == 0 {
+                let newCategoryCoreData = TrackerCategory(title: category.title, trackers: [])
                 try trackerCategoryStore.addNewCategory(newCategoryCoreData)
             }
             
-            createCategoryAndTracker(tracker: tracker, with: categoryTitle)
+            createCategoryAndTracker(tracker: tracker, with: category.title)
             fetchCategory()
             collectionView.reloadData()
             updateUI()
@@ -373,8 +372,8 @@ extension TrackersViewController: NewTrackerViewControllerDelegate {
         return dateFormatter.string(from: currentDate)
     }
     
-    func didCreateNewTracker(_ tracker: Tracker) {
-        addTracker(tracker, to: 0)
+    func didCreateNewTracker(_ tracker: Tracker, _ category: TrackerCategory) {
+        addTracker(tracker, to: category)
     }
 }
 

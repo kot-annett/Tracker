@@ -22,6 +22,7 @@ final class ScheduleViewController: UIViewController {
         let tableView = UITableView()
         tableView.layer.cornerRadius = 16
         tableView.isScrollEnabled = false
+        tableView.separatorStyle = .none
         tableView.register(ScheduleTableViewCell.self, forCellReuseIdentifier: ScheduleTableViewCell.reuseIdentifier)
         return tableView
     }()
@@ -116,8 +117,23 @@ extension ScheduleViewController: UITableViewDataSource {
         cell.selectionStyle = .none
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
+        let separator = UIView()
+        separator.backgroundColor = UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1.0)
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        cell.contentView.addSubview(separator)
+        NSLayoutConstraint.activate([
+            separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+            separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
+            separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+            separator.heightAnchor.constraint(equalToConstant: 1)
+        ])
+        
+        if indexPath.row == titles.count - 1 {
+            separator.isHidden = true
+        }
+        
         return cell
-    } 
+    }
 }
 
 extension ScheduleViewController: UITableViewDelegate {

@@ -10,17 +10,46 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private let trackerCategoryStore = TrackerCategoryStore()
 
-
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         
         guard let scene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: scene)
-        window.rootViewController = TabBarController()
+        window.rootViewController = showOnboardingOrApp()
+        
         self.window = window
         window.makeKeyAndVisible()
     }
-
+        
+        private func showOnboardingOrApp() -> UIViewController {
+            let userDefaults = UserDefaults.standard
+            let hasCompletedOnboarding = userDefaults.bool(forKey: "hasCompletedOnboarding")
+            
+            if hasCompletedOnboarding {
+                return TabBarController()
+            } else {
+                let onboardingVC = OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
+                onboardingVC.onEnterButtonTapped = {
+                    self.completeOnboarding()
+                }
+                return onboardingVC
+            }
+        }
+//            } else {
+//                return OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
+//            }
+        
+        
+        private func completeOnboarding() {
+            let userDefaults = UserDefaults.standard
+            userDefaults.set(true, forKey: "hasCompletedOnboarding")
+            
+            window?.rootViewController = TabBarController()
+        }
+    
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.

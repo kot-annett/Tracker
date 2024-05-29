@@ -5,7 +5,6 @@
 //  Created by Anna on 11.04.2024.
 //
 
-import Foundation
 import UIKit
 
 final class NewHabitTableViewCell: UITableViewCell {
@@ -27,7 +26,7 @@ final class NewHabitTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let descriptionLabel: UILabel = {
+    let descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.textColor = .gray

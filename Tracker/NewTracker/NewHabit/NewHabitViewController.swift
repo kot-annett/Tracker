@@ -15,7 +15,14 @@ final class NewHabitViewController: UIViewController {
     private let titles = ["Категория", "Расписание"]
     private let trackerType: TrackerType = .habit
     private let newTrackername: String = ""
-    private var categoryName: String = ""
+    private var categoryName: String = "" {
+        didSet {
+            if !categoryName.isEmpty {
+                print(categoryName)
+                tableView.reloadData()
+            }
+        }
+    }
     private var schedule: [String] = []
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
@@ -47,6 +54,7 @@ final class NewHabitViewController: UIViewController {
         let tableView = UITableView()
         tableView.layer.cornerRadius = 16
         tableView.isScrollEnabled = false
+        tableView.separatorStyle = .none
         tableView.register(NewHabitTableViewCell.self, forCellReuseIdentifier: NewHabitTableViewCell.reuseIdentifier)
         return tableView
     }()
@@ -134,7 +142,6 @@ final class NewHabitViewController: UIViewController {
     @objc private func createButtonTapped() {
         guard let newTrackerName = nameTextField.text else { return }
         guard let date = delegate?.setDateForNewTracker() else { return }
-        
         var newTrackerSchedule: [String] = []
         
         switch trackerType {
@@ -155,7 +162,8 @@ final class NewHabitViewController: UIViewController {
             emoji: selectedEmoji ?? Constant.randomEmoji(),
             schedule: formattedSchedule
         )
-        delegate?.didCreateNewTracker(newTracker)
+        let newCategory = TrackerCategory(title: categoryName, trackers: [newTracker])
+        delegate?.didCreateNewTracker(newTracker, newCategory)
         dismiss(animated: true)
     }
     
@@ -169,7 +177,7 @@ final class NewHabitViewController: UIViewController {
         createButton.isEnabled = true
         createButton.backgroundColor = UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
     }
-    
+ 
     private func setupUI() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
@@ -245,7 +253,9 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         cell.setTitle(titles[indexPath.row])
         
-        if indexPath.row == 1 {
+        if indexPath.row == 0 {
+            cell.setDescription(categoryName)
+        } else if indexPath.row == 1 {
             let selectedDaysArray = selectedDays.filter { $0.value }.map { $0.key }
             if selectedDaysArray.isEmpty {
                 cell.setDescription("") 
@@ -255,10 +265,23 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
                 let selectedDaysString = selectedDaysArray.map { $0.stringValue }.joined(separator: ", ")
                 cell.setDescription(selectedDaysString)
             }
-        } else {
-            cell.setDescription("")
-        }
+        } 
         
+        let separator = UIView()
+        separator.backgroundColor = UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1.0)
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        cell.contentView.addSubview(separator)
+        NSLayoutConstraint.activate([
+            separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+            separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
+            separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+            separator.heightAnchor.constraint(equalToConstant: 1)
+        ])
+        
+        if indexPath.row == titles.count - 1 {
+            separator.isHidden = true
+        }
+       
         return cell
     }
     
@@ -269,7 +292,11 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch indexPath.row {
         case 0:
-            let categoryVC = CategoryViewController()
+            let trackerCategoryStore = TrackerCategoryStore()
+            let categoryViewModel = CategoryViewModel(trackerCategoryStore: trackerCategoryStore)
+            let categoryVC = CategoryViewController(viewModel: categoryViewModel)
+            categoryVC.selectedCategory = categoryName
+            categoryVC.delegate = self
             navigationController?.pushViewController(categoryVC, animated: true)
         case 1:
             let scheduleVC = ScheduleViewController()
@@ -279,7 +306,6 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         default:
             break
         }
-        
     }
 }
 
@@ -402,5 +428,12 @@ extension NewHabitViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+}
+
+extension NewHabitViewController: CategoryViewControllerDelegate {
+    func didSelectCategory(_ category: String) {
+        categoryName = category
+        tableView.reloadData()
     }
 }

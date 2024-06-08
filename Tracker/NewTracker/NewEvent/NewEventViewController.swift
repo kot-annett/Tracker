@@ -16,6 +16,15 @@ final class NewEventViewController: UIViewController {
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
     private var categoryName: String = ""
+    var selectedCategory: TrackerCategory? {
+        didSet {
+            if let category = selectedCategory {
+                categoryName = category.title
+                tableView.reloadData()
+            }
+        }
+    }
+    private var isEditingTracker = false
     
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -352,6 +361,11 @@ extension NewEventViewController: UICollectionViewDelegate {
 }
 
 extension NewEventViewController: CategoryViewControllerDelegate {
+    func didSelectCategoryEditMode(_ category: TrackerCategory) {
+        selectedCategory = category
+        tableView.reloadData()
+    }
+    
     func didSelectCategory(_ category: String) {
         categoryName = category
         tableView.reloadData()

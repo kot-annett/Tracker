@@ -15,6 +15,7 @@ final class NewTrackerCollectionViewCell: UICollectionViewCell {
         let view = UIView()
         view.layer.cornerRadius = 16
         view.backgroundColor = UIColor.lightGray.withAlphaComponent(0.3)
+        view.isHidden = true
         return view
     }()
     
@@ -30,6 +31,7 @@ final class NewTrackerCollectionViewCell: UICollectionViewCell {
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 3
         view.alpha = 0.3
+        view.isHidden = true
         return view
     }()
     
@@ -51,10 +53,10 @@ final class NewTrackerCollectionViewCell: UICollectionViewCell {
     override var isSelected: Bool {
         didSet {
             if !emojiLabel.isHidden {
-                self.emojiPickView.isHidden = isSelected ? false : true
+                self.emojiPickView.isHidden = !isSelected
             }
             if !colorView.isHidden {
-                self.colorPickView.isHidden = isSelected ? false : true
+                self.colorPickView.isHidden = !isSelected
             }
         }
     }

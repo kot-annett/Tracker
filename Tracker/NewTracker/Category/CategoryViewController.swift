@@ -9,6 +9,7 @@ import UIKit
 
 protocol CategoryViewControllerDelegate: AnyObject {
     func didSelectCategory(_ category: String)
+    func didSelectCategoryEditMode(_ category: TrackerCategory)
 }
 
 final class CategoryViewController: UIViewController {
@@ -181,7 +182,9 @@ extension CategoryViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectedCategory = viewModel.categories[indexPath.row].title
+        let categoryEditMode = viewModel.categories[indexPath.row]
         delegate?.didSelectCategory(selectedCategory)
+        delegate?.didSelectCategoryEditMode(categoryEditMode)
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         navigationController?.popViewController(animated: true)
     }

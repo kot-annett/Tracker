@@ -5,13 +5,17 @@
 //  Created by Anna on 09.04.2024.
 //
 
-import Foundation
 import UIKit
 
 protocol TrackerCollectionViewCellDelegate: AnyObject {
     func record(_ sender: Bool, _ cell: TrackerCollectionViewCell)
     func completeTracker(id: UUID, at indexPath: IndexPath)
     func uncompleteTracker(id: UUID, at indexPath: IndexPath)
+    func pinTracker(at indexPath: IndexPath)
+    func unpinTracker(at indexPath: IndexPath)
+    func editTracker(at indexPath: IndexPath)
+    func deleteTracker(at indexPath: IndexPath)
+    func isTrackerPinned(at indexPath: IndexPath) -> Bool
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -73,6 +77,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        let interaction = UIContextMenuInteraction(delegate: self)
+        colorView.addInteraction(interaction)
     }
     
     required init?(coder: NSCoder) {
@@ -130,39 +136,57 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let plusImage = UIImage(systemName: "checkmark")
         let checkImage = UIImage(systemName: "plus")
     }
-   
+    
     private func setQuantityLabelText(_ count: Int) -> String {
-        let daysForms = ["дней", "день", "дня"]
-        let remainder100 = count % 100
-        let remainder10 = count % 10
-        var formIndex: Int
+        let language = Locale.current.languageCode
         
-        switch remainder100 {
-        case 11...14:
-            formIndex = 0
-        default:
-            switch remainder10 {
-            case 1:
-                formIndex = 1
-            case 2...4:
-                formIndex = 2
-            default: 
+        if language == "ru" {
+            // Логика для русского языка
+            let daysForms = [
+                NSLocalizedString("days_many", comment: "Plural form for days"),
+                NSLocalizedString("day", comment: "Singular form for day"),
+                NSLocalizedString("days_few", comment: "Few form for days")
+            ]
+
+            let remainder100 = count % 100
+            let remainder10 = count % 10
+            var formIndex: Int
+            
+            switch remainder100 {
+            case 11...14:
                 formIndex = 0
+            default:
+                switch remainder10 {
+                case 1:
+                    formIndex = 1
+                case 2...4:
+                    formIndex = 2
+                default:
+                    formIndex = 0
+                }
             }
+            
+            return "\(count) \(daysForms[formIndex])"
+        } else {
+            // Логика для английского языка
+            let dayString = count == 1 ? NSLocalizedString("day", comment: "Singular form for day") : NSLocalizedString("days_few", comment: "Plural form for days")
+            return "\(count) \(dayString)"
         }
-        
-        return "\(count) \(daysForms[formIndex])"
     }
     
     private func setupUI() {
         contentView.backgroundColor = .clear
         
-        [colorView, nameLabel, emojiImageView, quantityLabel, quantityButton].forEach {
+        [colorView, quantityButton, quantityLabel].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        [colorView, emojiImageView, quantityButton, quantityLabel, nameLabel].forEach {
             contentView.addSubview($0)
         }
+        
+        [emojiImageView, nameLabel].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        colorView.addSubview(emojiImageView)
+        colorView.addSubview(nameLabel)
         
         NSLayoutConstraint.activate([
             colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -190,4 +214,40 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
 }
+
+extension TrackerCollectionViewCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let indexPath = indexPath else { return nil }
+        
+        let configContextMenu = UIContextMenuConfiguration(actionProvider: { _ in
+            let isPinned = self.delegate?.isTrackerPinned(at: indexPath) ?? false
+            let pinTitle = isPinned ? "Открепить" : "Закрепить"
+            
+            let pinAction = UIAction(title: pinTitle) { _ in
+                if isPinned {
+                    self.delegate?.unpinTracker(at: indexPath)
+                } else {
+                    self.delegate?.pinTracker(at: indexPath)
+                }
+            }
+            
+            let editAction = UIAction(title: "Редактировать") { _ in
+                self.delegate?.editTracker(at: indexPath)
+            }
+            
+            let deleteAction = UIAction(title: "Удалить",
+                                  attributes: .destructive) { _ in
+                self.delegate?.deleteTracker(at: indexPath)
+            }
+            
+            let actions = [pinAction, editAction, deleteAction]
+            return UIMenu(title: "", children: actions)
+        })
+        
+        return configContextMenu
+    }
+}
+
+
+
 

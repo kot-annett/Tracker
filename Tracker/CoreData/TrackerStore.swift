@@ -104,6 +104,38 @@ final class TrackerStore: NSObject {
             emoji: emoji,
             schedule: trackersCoreData.schedule ?? "")
     }
+    
+    func updateTracker(_ tracker: Tracker) -> TrackerCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let trackerEntity = results.first {
+                trackerEntity.name = tracker.name
+                trackerEntity.color = uiColorMarshalling.hexString(from: tracker.color)
+                trackerEntity.emoji = tracker.emoji
+                trackerEntity.schedule = tracker.schedule
+                try context.save()
+                return trackerEntity
+            }
+        } catch {
+            print("Error updating tracker: \(error)")
+        }
+        return nil
+    }
+    
+    func deleteTracker(tracker: Tracker) {
+        do {
+            let targetTrackers = try fetchTrackerCoreData()
+            if let index = targetTrackers.firstIndex(where: {$0.id == tracker.id}) {
+                context.delete(targetTrackers[index])
+                try context.save()
+            }
+        } catch {
+            print("Ошибка при получении трекеров: \(error)")
+        }
+    }
 }
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {

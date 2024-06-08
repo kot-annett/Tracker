@@ -22,32 +22,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         window.makeKeyAndVisible()
     }
+    
+    private func showOnboardingOrApp() -> UIViewController {
+        let userDefaults = UserDefaults.standard
+        let hasCompletedOnboarding = userDefaults.bool(forKey: "hasCompletedOnboarding")
         
-        private func showOnboardingOrApp() -> UIViewController {
-            let userDefaults = UserDefaults.standard
-            let hasCompletedOnboarding = userDefaults.bool(forKey: "hasCompletedOnboarding")
-            
-            if hasCompletedOnboarding {
-                return TabBarController()
-            } else {
-                let onboardingVC = OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
-                onboardingVC.onEnterButtonTapped = {
-                    self.completeOnboarding()
-                }
-                return onboardingVC
+        if hasCompletedOnboarding {
+            return TabBarController()
+        } else {
+            let onboardingVC = OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
+            onboardingVC.onEnterButtonTapped = {
+                self.completeOnboarding()
             }
+            return onboardingVC
         }
-//            } else {
-//                return OnboardingViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
-//            }
+    }
+    
+    private func completeOnboarding() {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(true, forKey: "hasCompletedOnboarding")
         
-        
-        private func completeOnboarding() {
-            let userDefaults = UserDefaults.standard
-            userDefaults.set(true, forKey: "hasCompletedOnboarding")
-            
-            window?.rootViewController = TabBarController()
-        }
+        window?.rootViewController = TabBarController()
+    }
     
     
     func sceneDidDisconnect(_ scene: UIScene) {

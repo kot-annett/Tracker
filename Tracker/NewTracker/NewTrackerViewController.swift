@@ -11,6 +11,7 @@ import UIKit
 protocol NewTrackerViewControllerDelegate: AnyObject {
     func setDateForNewTracker() -> String
     func didCreateNewTracker(_ tracker: Tracker, _ category: TrackerCategory)
+    func didEditTracker(_ tracker: Tracker, _ category: TrackerCategory)
 }
 
 final class NewTrackerViewController: UIViewController {

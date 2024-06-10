@@ -12,13 +12,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>540</string>
+					<string>593</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>539</string>
+					<string>592</string>
 					<key>Timestamp</key>
-					<string>739539884.87669</string>
+					<string>739705464.042892</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -59,13 +59,13 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>464</string>
+					<string>512</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>463</string>
+					<string>511</string>
 					<key>Timestamp</key>
-					<string>739539884.876668</string>
+					<string>739705464.042869</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -282,6 +282,53 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 			</dict>
 			<key>title</key>
 			<string>didSelectRowAt tableView NewHabitVC</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>0</string>
+					<key>EndingLineNumber</key>
+					<string>123</string>
+					<key>StartingColumnNumber</key>
+					<string>0</string>
+					<key>StartingLineNumber</key>
+					<string>122</string>
+					<key>Timestamp</key>
+					<string>739700793.71867</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Tracker/Tracker/TrackersViewController.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>    @objc private func filterButtonTapped(_ sender: UIButton) {
+</string>
+				<key>leading</key>
+				<string>    }
+    
+</string>
+				<key>trailing</key>
+				<string>        analyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
+        let filterViewController = FilterViewController()
+        filterViewController.delegate = self
+</string>
+			</dict>
+			<key>title</key>
+			<string>filterButtonTapped</string>
 			<key>type</key>
 			<string>bookmark</string>
 		</dict>

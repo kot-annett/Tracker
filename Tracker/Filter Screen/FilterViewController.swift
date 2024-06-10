@@ -14,7 +14,8 @@ protocol FilterViewControllerDelegate: AnyObject {
 final class FilterViewController: UIViewController {
     weak var delegate: FilterViewControllerDelegate?
     private let titles = ["Все трекеры", "Трекеры на сегодня", "Завершенные", "Не завершенные"]
-    private let filters: [TrackerFilter] = [.all, .today, .completed, .notCompleted]
+    private var filters: [TrackerFilter] = [.all, .today, .completed, .notCompleted]
+    var selectedFilter: TrackerFilter?
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -38,9 +39,9 @@ final class FilterViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(4 * 75))
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableView.heightAnchor.constraint(equalToConstant: 300)
             ])
     }
     
@@ -50,7 +51,6 @@ final class FilterViewController: UIViewController {
         navigationItem.hidesBackButton = true
         view.backgroundColor = .white
     }
-   
 }
 
 extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
@@ -62,9 +62,6 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
         cell.textLabel?.text = titles[indexPath.row]
         cell.selectionStyle = .none
-        
-        cell.selectionStyle = .none
-        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         cell.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
         
         let separator = UIView()
@@ -82,6 +79,23 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
             separator.isHidden = true
         }
         
+        if selectedFilter == filters[indexPath.row] {
+            let checkmarkImage = UIImage(systemName: "checkmark")?.withRenderingMode(.alwaysTemplate)
+            let checkmarkImageView = UIImageView(image: checkmarkImage)
+            checkmarkImageView.tintColor = .blue
+            checkmarkImageView.translatesAutoresizingMaskIntoConstraints = false
+            cell.contentView.addSubview(checkmarkImageView)
+            
+            NSLayoutConstraint.activate([
+                checkmarkImageView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
+                checkmarkImageView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+                checkmarkImageView.widthAnchor.constraint(equalToConstant: 24),
+                checkmarkImageView.heightAnchor.constraint(equalToConstant: 24)
+            ])
+        } else {
+            cell.accessoryView = nil
+        }
+        
         return cell
     }
     
@@ -90,8 +104,17 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let previousSelectedFilter = selectedFilter,
+           let previousSelectedIndex = filters.firstIndex(of: previousSelectedFilter) {
+            let previousIndexPath = IndexPath(row: previousSelectedIndex, section: 0)
+            tableView.cellForRow(at: previousIndexPath)?.accessoryType = .none
+        }
+        
+        selectedFilter = filters[indexPath.row]
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        delegate?.didSelectFilter(filters[indexPath.row])
+        if let selectedFilter = selectedFilter {
+                delegate?.didSelectFilter(selectedFilter)
+            }
         dismiss(animated: true)
     }
 }

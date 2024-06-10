@@ -55,6 +55,19 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
+    private let placeholderImageFilter: UIImageView = {
+        let image = UIImageView()
+        image.image = UIImage(named: "filterHolder")
+        return image
+    }()
+    
+    private let placeholderLabelFilter: UILabel = {
+        let label = UILabel()
+        label.text = "Ничего не найдено"
+        label.font = UIFont(name: "SFPro-Medium", size: 12)
+        return label
+    }()
+    
     private let datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
@@ -111,6 +124,7 @@ final class TrackersViewController: UIViewController {
         analyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
         let filterViewController = FilterViewController()
         filterViewController.delegate = self
+        filterViewController.selectedFilter = currentFilter
         let filterNavController = UINavigationController(rootViewController: filterViewController)
         self.present(filterNavController, animated: true)
     }
@@ -174,7 +188,7 @@ final class TrackersViewController: UIViewController {
         
         [collectionView,
          placeholderImageView,
-         placeholderLabel, filterButton].forEach{
+         placeholderLabel, placeholderImageFilter, placeholderLabelFilter, filterButton].forEach{
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -197,12 +211,27 @@ final class TrackersViewController: UIViewController {
             
             placeholderLabel.topAnchor.constraint(equalTo: placeholderImageView.bottomAnchor, constant: 10),
             placeholderLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+
+            placeholderImageFilter.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            placeholderImageFilter.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            placeholderImageFilter.widthAnchor.constraint(equalToConstant: 80),
+            placeholderImageFilter.heightAnchor.constraint(equalToConstant: 80),
+
+            placeholderLabelFilter.topAnchor.constraint(equalTo: placeholderImageFilter.bottomAnchor, constant: 10),
+            placeholderLabelFilter.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             filterButton.widthAnchor.constraint(equalToConstant: 115),
             filterButton.heightAnchor.constraint(equalToConstant: 50)
         ])
+        
+        let filterButtonHeight: CGFloat = 50
+        let filterButtonBottomInset: CGFloat = 16
+        let collectionViewBottomInset = filterButtonHeight + filterButtonBottomInset + 16
+        
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: collectionViewBottomInset, right: 0)
+        collectionView.scrollIndicatorInsets = collectionView.contentInset
     }
     
     private func setupNavigationBar() {
@@ -231,11 +260,15 @@ final class TrackersViewController: UIViewController {
         if visibleCategories.isEmpty {
             placeholderImageView.isHidden = false
             placeholderLabel.isHidden = false
+            placeholderImageFilter.isHidden = true
+            placeholderLabelFilter.isHidden = true
             filterButton.isHidden = true
             collectionView.isHidden = true
         } else {
             placeholderImageView.isHidden = true
             placeholderLabel.isHidden = true
+            placeholderImageFilter.isHidden = true
+            placeholderLabelFilter.isHidden = true
             collectionView.isHidden = false
             filterButton.isHidden = false
             collectionView.reloadData()
@@ -377,7 +410,12 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         if currentDate <= Date() {
             let trackerRecord = TrackerRecord(trackerID: id, date: datePicker.date)
             completedTrackers.insert(trackerRecord)
-            createRecord(record: trackerRecord)
+            do {
+                try trackerRecordStore.addNewRecord(from: trackerRecord)
+            } catch {
+                print("Error adding record: \(error)")
+            }
+//            createRecord(record: trackerRecord)
             collectionView.reloadItems(at: [indexPath])
         }
     }
@@ -385,8 +423,12 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
         if let trackerRecordToDelete = completedTrackers.first(where: { $0.trackerID == id }) {
             completedTrackers.remove(trackerRecordToDelete)
-            deleteRecord(record: trackerRecordToDelete)
-            
+//            deleteRecord(record: trackerRecordToDelete)
+            do {
+                try trackerRecordStore.deleteTrackerRecord(trackerRecord: trackerRecordToDelete)
+            } catch {
+                print("Error deleting record: \(error)")
+            }
             collectionView.reloadItems(at: [indexPath])
         }
     }
@@ -446,6 +488,12 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
     private func fetchCategoryAndUpdateUI() {
         fetchCategory()
         visibleCategories = categories
+        
+        if let pinnedIndex = visibleCategories.firstIndex(where: { $0.title == "Закрепленные" }) {
+            let pinnedCategory = visibleCategories.remove(at: pinnedIndex)
+            visibleCategories.insert(pinnedCategory, at: 0)
+        }
+        
         collectionView.reloadData()
     }
     
@@ -476,8 +524,13 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
     
     func deleteTracker(at indexPath: IndexPath) {
         analyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
-        let alert = UIAlertController(title: "", message: "Уверены, что хотите удалить трекер?", preferredStyle: .alert)
-        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [self] _ in
+        let alert = UIAlertController(
+            title: "",
+            message: "Уверены, что хотите удалить трекер?",
+            preferredStyle: .actionSheet)
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) {
+            [weak self] _ in
+            guard let self = self else { return }
             let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
             trackerStore.deleteTracker(tracker: tracker)
 
@@ -659,14 +712,14 @@ extension TrackersViewController {
     }
     
     private func showPlaceholder() {
-        placeholderImageView.isHidden = false
-        placeholderLabel.isHidden = false
+        placeholderImageFilter.isHidden = false
+        placeholderLabelFilter.isHidden = false
         collectionView.isHidden = true
     }
     
     private func hidePlaceholder() {
-        placeholderImageView.isHidden = true
-        placeholderLabel.isHidden = true
+        placeholderImageFilter.isHidden = true
+        placeholderLabelFilter.isHidden = true
         collectionView.isHidden = false
     }
 }

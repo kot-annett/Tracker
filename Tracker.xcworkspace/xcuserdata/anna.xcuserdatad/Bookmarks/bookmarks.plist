@@ -12,13 +12,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>593</string>
+					<string>618</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>592</string>
+					<string>617</string>
 					<key>Timestamp</key>
-					<string>739705464.042892</string>
+					<string>739806454.147051</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -59,13 +59,13 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>512</string>
+					<string>536</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>511</string>
+					<string>535</string>
 					<key>Timestamp</key>
-					<string>739705464.042869</string>
+					<string>739806454.146858</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -293,13 +293,13 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>123</string>
+					<string>124</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>122</string>
+					<string>123</string>
 					<key>Timestamp</key>
-					<string>739700793.71867</string>
+					<string>739801542.987149</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>

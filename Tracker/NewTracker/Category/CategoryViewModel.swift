@@ -33,6 +33,7 @@ final class CategoryViewModel: CategoryViewModelProtocol {
         do {
             let fetchedCategories = try trackerCategoryStore.fetchCategories()
             categories = fetchedCategories.compactMap { trackerCategoryStore.updateTrackerCategory($0) }
+                .filter { $0.title != "Закрепленные" }
         } catch {
             print("Error fetching categories: \(error)")
         }

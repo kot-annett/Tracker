@@ -93,6 +93,7 @@ final class TrackersViewController: UIViewController {
         setupUI()
         syncData()
         updateUI()
+        loadTrackersAndCategories()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -127,6 +128,25 @@ final class TrackersViewController: UIViewController {
         filterViewController.selectedFilter = currentFilter
         let filterNavController = UINavigationController(rootViewController: filterViewController)
         self.present(filterNavController, animated: true)
+    }
+    
+    private func loadTrackersAndCategories() {
+        do {
+            let trackerCategoriesCoreData = try trackerCategoryStore.fetchCategories()
+            var trackerCategories = trackerCategoriesCoreData.compactMap { trackerCategoryStore.updateTrackerCategory($0) }
+            
+            if let pinnedIndex = trackerCategories.firstIndex(where: { $0.title == "Закрепленные" }) {
+                let pinnedCategory = trackerCategories.remove(at: pinnedIndex)
+                trackerCategories.insert(pinnedCategory, at: 0)
+            }
+            
+            categories = trackerCategories
+            visibleCategories = trackerCategories.filter { !$0.trackers.isEmpty }
+            collectionView.reloadData()
+            updateUI()
+        } catch {
+            print("Failed to load trackers and categories: \(error)")
+        }
     }
     
     private func syncData() {
@@ -177,6 +197,7 @@ final class TrackersViewController: UIViewController {
             createCategoryAndTracker(tracker: tracker, with: category.title)
             fetchCategory()
             collectionView.reloadData()
+            loadTrackersAndCategories()
             updateUI()
         } catch {
             print("Error: \(error)")
@@ -459,6 +480,7 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         }
         
         fetchCategoryAndUpdateUI()
+        loadTrackersAndCategories()
     }
     
     func unpinTracker(at indexPath: IndexPath) {
@@ -470,6 +492,7 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         }
         
         fetchCategoryAndUpdateUI()
+        loadTrackersAndCategories()
     }
     
     func isTrackerPinned(at indexPath: IndexPath) -> Bool {
@@ -483,6 +506,7 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         try? trackerCategoryStore.addNewTrackerToCategory(tracker, to: "Закрепленные")
         
         fetchCategoryAndUpdateUI()
+        loadTrackersAndCategories()
     }
     
     private func fetchCategoryAndUpdateUI() {
@@ -535,6 +559,7 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
             trackerStore.deleteTracker(tracker: tracker)
 
             fetchCategoryAndUpdateUI()
+            loadTrackersAndCategories()
         }
         let cancelAction = UIAlertAction(title: "Отменить", style: .cancel) { _ in }
         alert.addAction(deleteAction)

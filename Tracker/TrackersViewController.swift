@@ -94,6 +94,7 @@ final class TrackersViewController: UIViewController {
         syncData()
         updateUI()
         loadTrackersAndCategories()
+        fetchRecord()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -433,27 +434,32 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
             completedTrackers.insert(trackerRecord)
             do {
                 try trackerRecordStore.addNewRecord(from: trackerRecord)
+                collectionView.reloadItems(at: [indexPath])
             } catch {
                 print("Error adding record: \(error)")
             }
-//            createRecord(record: trackerRecord)
-            collectionView.reloadItems(at: [indexPath])
         }
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
         if let trackerRecordToDelete = completedTrackers.first(where: { $0.trackerID == id }) {
             completedTrackers.remove(trackerRecordToDelete)
-//            deleteRecord(record: trackerRecordToDelete)
             do {
                 try trackerRecordStore.deleteTrackerRecord(trackerRecord: trackerRecordToDelete)
+                collectionView.reloadItems(at: [indexPath])
+                updateStatistic()
             } catch {
                 print("Error deleting record: \(error)")
             }
-            collectionView.reloadItems(at: [indexPath])
         }
     }
-   
+    
+    private func updateStatistic() {
+        if let statisticVC = self.tabBarController?.viewControllers?.compactMap({ $0 as? UINavigationController }).first(where: { $0.viewControllers.contains(where: { $0 is StatisticViewController }) })?.viewControllers.first(where: { $0 is StatisticViewController }) as? StatisticViewController {
+            statisticVC.updateStat()
+        }
+    }
+    
     func record(_ sender: Bool, _ cell: TrackerCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         let id = visibleCategories[indexPath.section].trackers[indexPath.row].id
@@ -661,6 +667,7 @@ extension TrackersViewController {
     private func fetchRecord()  {
         do {
             completedTrackers = try trackerRecordStore.fetchRecords()
+            collectionView.reloadData()
         } catch {
             print("Ошибка при добавлении записи: \(error)")
         }

@@ -115,10 +115,15 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             return
         }
         
-        if trackerIsCompleted {
-            delegate?.uncompleteTracker(id: trackerId, at: indexPath)
-        } else {
-            delegate?.completeTracker(id: trackerId, at: indexPath)
+        quantityButton.isEnabled = false
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            if self.trackerIsCompleted {
+                self.delegate?.uncompleteTracker(id: trackerId, at: indexPath)
+            } else {
+                self.delegate?.completeTracker(id: trackerId, at: indexPath)
+            }
+            self.quantityButton.isEnabled = true
         }
     }
     

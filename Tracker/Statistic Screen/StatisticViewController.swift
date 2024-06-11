@@ -45,7 +45,7 @@ final class StatisticViewController: UIViewController {
         statView.frame = CGRect(x: 16, y: self.view.frame.midY - 45, width: self.view.frame.width - 32, height: 90)
     }
     
-    private func updateStat() {
+    func updateStat() {
         do {
             completedTrackers = try trackerRecordStore.fetchRecords()
             statView.configValue(value: completedTrackers.count)
@@ -98,5 +98,4 @@ final class StatisticViewController: UIViewController {
             statView.isHidden = false
         }
     }
-    
 }

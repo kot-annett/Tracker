@@ -12,13 +12,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>618</string>
+					<string>624</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>617</string>
+					<string>623</string>
 					<key>Timestamp</key>
-					<string>739806454.147051</string>
+					<string>739827543.1203589</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -59,13 +59,13 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>536</string>
+					<string>542</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>535</string>
+					<string>541</string>
 					<key>Timestamp</key>
-					<string>739806454.146858</string>
+					<string>739827543.120333</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -293,13 +293,13 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>124</string>
+					<string>125</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>123</string>
+					<string>124</string>
 					<key>Timestamp</key>
-					<string>739801542.987149</string>
+					<string>739822792.14842</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -329,6 +329,165 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 			</dict>
 			<key>title</key>
 			<string>filterButtonTapped</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>5</string>
+					<key>EndingLineNumber</key>
+					<string>97</string>
+					<key>StartingColumnNumber</key>
+					<string>4</string>
+					<key>StartingLineNumber</key>
+					<string>89</string>
+					<key>Timestamp</key>
+					<string>739822809.528532</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Tracker/Tracker/TrackersViewController.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>override func viewDidLoad() {
+        super.viewDidLoad()
+        setupNavigationBar()
+        setupUI()
+        syncData()
+        updateUI()
+        loadTrackersAndCategories()
+        fetchRecord()
+    }</string>
+				<key>leading</key>
+				<string>    }()
+    
+    </string>
+				<key>trailing</key>
+				<string>
+    
+    override func viewWillAppear(_ animated: Bool) {
+</string>
+			</dict>
+			<key>title</key>
+			<string>viewDidLoad TrackersVC</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>0</string>
+					<key>EndingLineNumber</key>
+					<string>667</string>
+					<key>StartingColumnNumber</key>
+					<string>0</string>
+					<key>StartingLineNumber</key>
+					<string>666</string>
+					<key>Timestamp</key>
+					<string>739827543.120352</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Tracker/Tracker/TrackersViewController.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>    private func fetchRecord()  {
+</string>
+				<key>leading</key>
+				<string>
+extension TrackersViewController {
+</string>
+				<key>trailing</key>
+				<string>        do {
+            completedTrackers = try trackerRecordStore.fetchRecords()
+            collectionView.reloadData()
+</string>
+			</dict>
+			<key>title</key>
+			<string>fetchRecord</string>
+			<key>type</key>
+			<string>bookmark</string>
+		</dict>
+		<dict>
+			<key>destination</key>
+			<dict>
+				<key>location-parameters</key>
+				<dict>
+					<key>EndingColumnNumber</key>
+					<string>5</string>
+					<key>EndingLineNumber</key>
+					<string>442</string>
+					<key>StartingColumnNumber</key>
+					<string>4</string>
+					<key>StartingLineNumber</key>
+					<string>429</string>
+					<key>Timestamp</key>
+					<string>739826644.915326</string>
+				</dict>
+				<key>rebasable-url</key>
+				<dict>
+					<key>base</key>
+					<string>workspace</string>
+					<key>payload</key>
+					<dict>
+						<key>relative-path</key>
+						<string>Tracker/Tracker/TrackersViewController.swift</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>text-context</key>
+			<dict>
+				<key>focused</key>
+				<string>func completeTracker(id: UUID, at indexPath: IndexPath) {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "track"])
+        if currentDate &lt;= Date() {
+            let trackerRecord = TrackerRecord(trackerID: id, date: datePicker.date)
+            completedTrackers.insert(trackerRecord)
+            do {
+                try trackerRecordStore.addNewRecord(from: trackerRecord)
+                collectionView.reloadItems(at: [indexPath])
+            } catch {
+                print("Error adding record: \(error)")
+            }
+        }
+    }</string>
+				<key>leading</key>
+				<string>
+extension TrackersViewController: TrackerCollectionViewCellDelegate {
+    </string>
+				<key>trailing</key>
+				<string>
+    
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+</string>
+			</dict>
+			<key>title</key>
+			<string>completeRecord</string>
 			<key>type</key>
 			<string>bookmark</string>
 		</dict>

@@ -59,10 +59,7 @@ final class TrackerRecordStore: NSObject, NSFetchedResultsControllerDelegate {
         else {
             throw StoreError.decodeError
         }
-        return TrackerRecord(
-            trackerID: id,
-            date: date
-        )
+        return TrackerRecord(trackerID: id, date: date)
     }
     
     func addNewRecord(from trackerRecord: TrackerRecord) throws {

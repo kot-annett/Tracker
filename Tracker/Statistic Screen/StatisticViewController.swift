@@ -11,7 +11,6 @@ final class StatisticViewController: UIViewController {
     private var trackers: [Tracker] = []
     private var completedTrackers: Set<TrackerRecord> = []
     private let trackerRecordStore = TrackerRecordStore()
-    
     private let statView = CustomStatisticView(title: "0", subtitle: "Трекеров завершено")
     
     private let placeholderLabel: UILabel = {
@@ -30,29 +29,19 @@ final class StatisticViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        trackerRecordStore.delegate = self
         setupUI()
         setupNavigationBar()
-        updateStat()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        updateStat()
+        updateStatistic()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         statView.frame = CGRect(x: 16, y: self.view.frame.midY - 45, width: self.view.frame.width - 32, height: 90)
-    }
-    
-    func updateStat() {
-        do {
-            completedTrackers = try trackerRecordStore.fetchRecords()
-            statView.configValue(value: completedTrackers.count)
-            updateUI()
-        } catch {
-            print("Ошибка при получении записей: \(error)")
-        }
     }
     
     private func setupUI() {
@@ -97,5 +86,18 @@ final class StatisticViewController: UIViewController {
             placeholderLabel.isHidden = true
             statView.isHidden = false
         }
+    }
+    
+    private func updateStatistic() {
+        completedTrackers = trackerRecordStore.completedTrackers
+        let quantity = completedTrackers.count
+        statView.configValue(value: quantity)
+        updateUI()
+    }
+}
+
+extension StatisticViewController: TrackerRecordStoreDelegate {
+    func didUpdateRecords() {
+        updateStatistic()
     }
 }

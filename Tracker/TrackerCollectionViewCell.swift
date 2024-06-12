@@ -21,7 +21,6 @@ protocol TrackerCollectionViewCellDelegate: AnyObject {
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     static let reuseIdentifier = "TrackerCell"
-    
     weak var delegate: TrackerCollectionViewCellDelegate?
     
     private var quantity: Int = 0
@@ -115,16 +114,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             return
         }
         
-        quantityButton.isEnabled = false
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            if self.trackerIsCompleted {
+//        quantityButton.isEnabled = false
+//        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            if trackerIsCompleted {
                 self.delegate?.uncompleteTracker(id: trackerId, at: indexPath)
             } else {
                 self.delegate?.completeTracker(id: trackerId, at: indexPath)
             }
-            self.quantityButton.isEnabled = true
-        }
+//            self.quantityButton.isEnabled = true
+//        }
     }
     
     private func setupQuantityButton(with tracker: Tracker) {

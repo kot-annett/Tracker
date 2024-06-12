@@ -442,21 +442,15 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+        let trackerRecord = TrackerRecord(trackerID: id, date: datePicker.date)
         if let trackerRecordToDelete = completedTrackers.first(where: { $0.trackerID == id }) {
             completedTrackers.remove(trackerRecordToDelete)
             do {
                 try trackerRecordStore.deleteTrackerRecord(trackerRecord: trackerRecordToDelete)
                 collectionView.reloadItems(at: [indexPath])
-                updateStatistic()
             } catch {
                 print("Error deleting record: \(error)")
             }
-        }
-    }
-    
-    private func updateStatistic() {
-        if let statisticVC = self.tabBarController?.viewControllers?.compactMap({ $0 as? UINavigationController }).first(where: { $0.viewControllers.contains(where: { $0 is StatisticViewController }) })?.viewControllers.first(where: { $0 is StatisticViewController }) as? StatisticViewController {
-            statisticVC.updateStat()
         }
     }
     

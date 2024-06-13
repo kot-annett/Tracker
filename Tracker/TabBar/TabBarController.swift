@@ -5,7 +5,6 @@
 //  Created by Anna on 06.04.2024.
 //
 
-import Foundation
 import UIKit
 
 final class TabBarController: UITabBarController {
@@ -20,13 +19,13 @@ final class TabBarController: UITabBarController {
         let statisticVC = UINavigationController(rootViewController: StatisticViewController())
         
         trackersVC.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: NSLocalizedString("Trackers", comment: "Title for the main screen"),
             image: UIImage(systemName: "record.circle.fill"),
             selectedImage: nil
         )
         
         statisticVC.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: NSLocalizedString("Statistics", comment: "Title for the statistics tab"),
             image: UIImage(systemName: "hare.fill"),
             selectedImage: nil
         )

@@ -65,7 +65,6 @@ final class TrackerCategoryStore: NSObject {
         guard let trackerCategoryCoreData = NSEntityDescription.entity(forEntityName: "TrackerCategoryCoreData", in: context) else { return }
 
         if try context.fetch(TrackerCategoryCoreData.fetchRequest()).contains(where: { $0.title == categoryName.title }) {
-            print("Category already exists: \(categoryName.title)")
             return
         }
         
@@ -74,7 +73,6 @@ final class TrackerCategoryStore: NSObject {
         newCategory.trackers = []
         do {
             try context.save()
-            print("Context saved successfully")
         } catch {
             context.rollback()
             throw StoreError.decodeError
@@ -131,6 +129,20 @@ final class TrackerCategoryStore: NSObject {
     
     func category(with categoryName: String) -> TrackerCategoryCoreData? {
         return try? fetchCategories().filter({$0.title == categoryName}).first ?? nil
+    }
+    
+    func deleteTrackerFromCategory(tracker: Tracker, from categoryTitle: String) throws {
+        guard let category = category(with: categoryTitle) else { return }
+        var currentTrackers = category.trackers?.allObjects as? [TrackerCoreData] ?? []
+        if let index = currentTrackers.firstIndex(where: { $0.id == tracker.id }) {
+            currentTrackers.remove(at: index)
+            category.trackers = NSSet(array: currentTrackers)
+            do {
+                try context.save()
+            } catch {
+                throw StoreError.decodeError
+            }
+        }
     }
     
     func deleteCategory(_ category: TrackerCategoryCoreData) throws {

@@ -5,7 +5,6 @@
 //  Created by Anna on 10.04.2024.
 //
 
-import Foundation
 import UIKit
 
 final class NewHabitViewController: UIViewController {
@@ -15,18 +14,27 @@ final class NewHabitViewController: UIViewController {
     private let titles = ["Категория", "Расписание"]
     private let trackerType: TrackerType = .habit
     private let newTrackername: String = ""
-    private var categoryName: String = "" {
+    var categoryName: String = "" {
         didSet {
             if !categoryName.isEmpty {
-                print(categoryName)
                 tableView.reloadData()
             }
         }
     }
-    private var schedule: [String] = []
+    var selectedCategory: TrackerCategory? {
+        didSet {
+            if let category = selectedCategory {
+                categoryName = category.title
+                tableView.reloadData()
+            }
+        }
+    }
+    private var schedule: String = ""
     private var selectedColor: UIColor?
     private var selectedEmoji: String?
+    private var editedTracker: Tracker?
     var selectedDays: [WeekDay: Bool] = [:]
+    var isEditingTracker = false
     
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -154,17 +162,59 @@ final class NewHabitViewController: UIViewController {
         }
         
         let formattedSchedule = newTrackerSchedule.joined(separator: ", ")
-        
-        let newTracker = Tracker(
-            id: UUID(),
-            name: newTrackerName,
-            color: selectedColor ?? .orange,
-            emoji: selectedEmoji ?? Constant.randomEmoji(),
-            schedule: formattedSchedule
-        )
-        let newCategory = TrackerCategory(title: categoryName, trackers: [newTracker])
-        delegate?.didCreateNewTracker(newTracker, newCategory)
+
+        if isEditingTracker, let editedTracker = editedTracker {
+            let updatedTracker = Tracker(
+                id: editedTracker.id,
+                name: newTrackerName,
+                color: selectedColor ?? editedTracker.color,
+                emoji: selectedEmoji ?? editedTracker.emoji,
+                schedule: formattedSchedule
+            )
+            let updatedCategory = TrackerCategory(
+                title: categoryName,
+                trackers: [updatedTracker]
+            )
+            delegate?.didEditTracker(updatedTracker, updatedCategory)
+        } else {
+            let newTracker = Tracker(
+                id: UUID(),
+                name: newTrackerName,
+                color: selectedColor ?? .orange,
+                emoji: selectedEmoji ?? Constant.randomEmoji(),
+                schedule: formattedSchedule
+            )
+            let newCategory = TrackerCategory(title: categoryName, trackers: [newTracker])
+            delegate?.didCreateNewTracker(newTracker, newCategory)
+        }
         dismiss(animated: true)
+    }
+    
+    func setupEditTracker(tracker: Tracker) {
+        isEditingTracker = true
+        editedTracker = tracker
+        nameTextField.text = tracker.name
+        schedule = tracker.schedule
+        selectedEmoji = tracker.emoji
+        selectedColor = tracker.color
+        selectedDays = [:]
+        
+        let days = tracker.schedule.components(separatedBy: ", ")
+        for day in days {
+            switch day {
+            case "Пн": selectedDays[.Monday] = true
+            case "Вт": selectedDays[.Tuesday] = true
+            case "Ср": selectedDays[.Wednesday] = true
+            case "Чт": selectedDays[.Thursday] = true
+            case "Пт": selectedDays[.Friday] = true
+            case "Сб": selectedDays[.Saturday] = true
+            case "Вс": selectedDays[.Sunday] = true
+            default: break
+            }
+        }
+        tableView.reloadData()
+        collectionView.reloadData()
+        checkCreateButtonAvailability()
     }
     
     private func checkCreateButtonAvailability() {
@@ -232,7 +282,11 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "Новая привычка"
+        if isEditingTracker {
+            navigationItem.title = "Редактирование привычки"
+        } else {
+            navigationItem.title = "Новая привычка"
+        }
         navigationController?.isNavigationBarHidden = false
         navigationItem.hidesBackButton = true
         view.backgroundColor = .white
@@ -258,14 +312,14 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         } else if indexPath.row == 1 {
             let selectedDaysArray = selectedDays.filter { $0.value }.map { $0.key }
             if selectedDaysArray.isEmpty {
-                cell.setDescription("") 
+                cell.setDescription("")
             } else if selectedDaysArray.count == WeekDay.allCases.count {
-                cell.setDescription("Каждый день") 
+                cell.setDescription("Каждый день")
             } else {
                 let selectedDaysString = selectedDaysArray.map { $0.stringValue }.joined(separator: ", ")
                 cell.setDescription(selectedDaysString)
             }
-        } 
+        }
         
         let separator = UIView()
         separator.backgroundColor = UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1.0)
@@ -336,11 +390,20 @@ extension NewHabitViewController: UICollectionViewDataSource {
         
         switch indexPath.section {
         case 0:
-            cell.setEmoji(Constant.emojies[indexPath.row])
-        default:
+            let emoji = Constant.emojies[indexPath.row]
+            cell.setEmoji(emoji)
+            if emoji == selectedEmoji {
+                collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            }
+        case 1:
             if let color = Constant.colorSelection[indexPath.row] {
                 cell.setColor(color)
-            } 
+                if color.isEqualTo(selectedColor) {
+                    collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                }
+            }
+        default:
+            break
         }
         
         return cell
@@ -419,9 +482,9 @@ extension NewHabitViewController: UICollectionViewDelegate {
 
 extension NewHabitViewController: ScheduleViewControllerDelegate {
     func didSelectDays(_ days: [WeekDay: Bool]) {
-            selectedDays = days
-            tableView.reloadData()
-        }
+        selectedDays = days
+        tableView.reloadData()
+    }
 }
 
 extension NewHabitViewController: UITextFieldDelegate {
@@ -434,6 +497,11 @@ extension NewHabitViewController: UITextFieldDelegate {
 extension NewHabitViewController: CategoryViewControllerDelegate {
     func didSelectCategory(_ category: String) {
         categoryName = category
+        tableView.reloadData()
+    }
+    
+    func didSelectCategoryEditMode(_ category: TrackerCategory) {
+        selectedCategory = category
         tableView.reloadData()
     }
 }

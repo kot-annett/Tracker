@@ -8,8 +8,13 @@
 import UIKit
 import CoreData
 
-final class TrackerRecordStore: NSObject, NSFetchedResultsControllerDelegate {
+protocol TrackerRecordStoreDelegate: AnyObject {
+    func didUpdateRecords()
+}
+
+final class TrackerRecordStore: NSObject {
     private let context: NSManagedObjectContext
+    public weak var delegate: TrackerRecordStoreDelegate?
     
     private var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData>?
     
@@ -59,10 +64,7 @@ final class TrackerRecordStore: NSObject, NSFetchedResultsControllerDelegate {
         else {
             throw StoreError.decodeError
         }
-        return TrackerRecord(
-            trackerID: id,
-            date: date
-        )
+        return TrackerRecord(trackerID: id, date: date)
     }
     
     func addNewRecord(from trackerRecord: TrackerRecord) throws {
@@ -103,6 +105,12 @@ final class TrackerRecordStore: NSObject, NSFetchedResultsControllerDelegate {
         } catch {
             throw StoreError.decodeError
         }
+    }
+}
+
+extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        delegate?.didUpdateRecords()
     }
 }
 

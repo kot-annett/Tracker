@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Anna on 03.06.2024.
+  
+*/
+
+"Trackers" = "Трекеры";
+"Filters" = "Фильтры";
+"Statistics" = "Статистика";
+"day" = "день";
+"days_few" = "дня";
+"days_many" = "дней";
